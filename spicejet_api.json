@@ -1,0 +1,2504 @@
+[
+  [
+    "https://www.spicejet.com/api/v1/search/getStationDetails?getAllCities=true&getPopular=true",
+    {
+      "status": "SUCCESS",
+      "data": {
+        "popularStations": [
+          {
+            "stationCode": "DEL",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIDP",
+            "fullName": "Delhi",
+            "shortName": "Delhi",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "283359N",
+                "longitude": "0770611E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "DL",
+              "cityCode": "DEL",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Indira Gandhi International Airport"
+          },
+          {
+            "stationCode": "BOM",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VABB",
+            "fullName": "Mumbai",
+            "shortName": "Mumbai",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "190519N",
+                "longitude": "0725205E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "MH",
+              "cityCode": "BOM",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Chhatrapati Shivaji Maharaj International Airport"
+          },
+          {
+            "stationCode": "BLR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "BOBG",
+            "fullName": "Bengaluru",
+            "shortName": "Bengaluru",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "125659N",
+                "longitude": "0774005E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "KA",
+              "cityCode": "BLR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Kempegowda International Airport"
+          },
+          {
+            "stationCode": "PNQ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAPO",
+            "fullName": "Pune",
+            "shortName": "Pune",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "183456N",
+                "longitude": "0735511E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "MH",
+              "cityCode": "PNQ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Pune International Airport"
+          }
+        ],
+        "stations": [
+          {
+            "stationCode": "AUH",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OMAA",
+            "fullName": "Abu Dhabi International Airport",
+            "shortName": "Abu Dhabi International Airport",
+            "macCode": null,
+            "currencyCode": "AED",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "242559N",
+                "longitude": "0543904E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "AE",
+              "provinceStateCode": "AZ",
+              "cityCode": "AUH",
+              "timeZoneCode": "AE",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "United Arab Emirates"
+            },
+            "airport": "Abu Dhabi International Airport"
+          },
+          {
+            "stationCode": "AGR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIAG",
+            "fullName": "Agra",
+            "shortName": "Agra",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "270921N",
+                "longitude": "0775739E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "UP",
+              "cityCode": "AGR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Pandit Deen Dayal Upadhyay Airport"
+          },
+          {
+            "stationCode": "AMD",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAAH",
+            "fullName": "Ahmedabad",
+            "shortName": "Ahmedabad",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "230438N",
+                "longitude": "0723805E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GJ",
+              "cityCode": "AMD",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Sardar Vallabhbhai Patel International Airport"
+          },
+          {
+            "stationCode": "ATQ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIAR",
+            "fullName": "Amritsar",
+            "shortName": "Amritsar",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "314225N",
+                "longitude": "0744750E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "PB",
+              "cityCode": "ATQ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Sri Guru Ram Dass Jee International Airport"
+          },
+          {
+            "stationCode": "IXU",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAAU",
+            "fullName": "Aurangabad",
+            "shortName": "Aurangabad",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": "INR",
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "195146N",
+                "longitude": "0752353E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "MH",
+              "cityCode": "IXU",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Aurangabad Airport"
+          },
+          {
+            "stationCode": "AYJ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Ayodhya",
+            "shortName": "Ayodhya",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": "INR",
+            "cultureCode": "en-GB",
+            "class": "\u0000",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "264512N",
+                "longitude": "0820901E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "UP",
+              "cityCode": "AYJ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Ayodhya Maharishi Valmiki Intl Airport"
+          },
+          {
+            "stationCode": "IXB",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VEBD",
+            "fullName": "Bagdogra",
+            "shortName": "Bagdogra",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "264052N",
+                "longitude": "0881943E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "WB",
+              "cityCode": "IXB",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Bagdogra International Airport"
+          },
+          {
+            "stationCode": "BGW",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Baghdad International Airport",
+            "shortName": "Baghdad International Airport",
+            "macCode": null,
+            "currencyCode": "USD",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "331545N",
+                "longitude": "0441404E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "IQ",
+              "provinceStateCode": null,
+              "cityCode": "BGW",
+              "timeZoneCode": "IQ",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": ""
+            },
+            "airport": "Baghdad International Airport"
+          },
+          {
+            "stationCode": "BKK",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VTBS",
+            "fullName": "Bangkok",
+            "shortName": "Bangkok",
+            "macCode": null,
+            "currencyCode": "THB",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "134109N",
+                "longitude": "1004456E"
+              },
+              "zoneCode": "32",
+              "subZoneCode": "320",
+              "countryCode": "TH",
+              "provinceStateCode": null,
+              "cityCode": "BKK",
+              "timeZoneCode": "TH",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Thailand"
+            },
+            "airport": "Suvarnabhumi Airport"
+          },
+          {
+            "stationCode": "BLR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "BOBG",
+            "fullName": "Bengaluru",
+            "shortName": "Bengaluru",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "125659N",
+                "longitude": "0774005E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "KA",
+              "cityCode": "BLR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Kempegowda International Airport"
+          },
+          {
+            "stationCode": "BHU",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VABV",
+            "fullName": "Bhavnagar",
+            "shortName": "Bhavnagar",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "214508N",
+                "longitude": "0721107E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GJ",
+              "cityCode": "BHU",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Bhavnagar Airport"
+          },
+          {
+            "stationCode": "BBI",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VEBS",
+            "fullName": "Bhubaneswar",
+            "shortName": "Bhubaneswar",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "201440N",
+                "longitude": "0854904E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "OR",
+              "cityCode": "BBI",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Bhubaneswar Airport"
+          },
+          {
+            "stationCode": "BKB",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIBK",
+            "fullName": "Bikaner",
+            "shortName": "Bikaner",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "280100N",
+                "longitude": "0731800E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "RJ",
+              "cityCode": "BKB",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Bikaner Airport"
+          },
+          {
+            "stationCode": "IXC",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VICG",
+            "fullName": "Chandigarh",
+            "shortName": "Chandigarh",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "304024N",
+                "longitude": "0764719E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "PB",
+              "cityCode": "IXC",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Chandigarh International Airport"
+          },
+          {
+            "stationCode": "MAA",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VOMM",
+            "fullName": "Chennai",
+            "shortName": "Chennai",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "125936N",
+                "longitude": "0801037E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "TN",
+              "cityCode": "MAA",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Chennai International Airport"
+          },
+          {
+            "stationCode": "CMB",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VCBI",
+            "fullName": "Colombo",
+            "shortName": "Colombo",
+            "macCode": null,
+            "currencyCode": "LKR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "071049N",
+                "longitude": "0795307E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "LK",
+              "provinceStateCode": null,
+              "cityCode": "CMB",
+              "timeZoneCode": "LK",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Sri Lanka"
+            },
+            "airport": "Bandaranaike International Airport"
+          },
+          {
+            "stationCode": "DBR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VE89",
+            "fullName": "Darbhanga",
+            "shortName": "Darbhanga",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "\u0000",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "261137N",
+                "longitude": "0855501E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "BR",
+              "cityCode": "DBR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Darbhanga Airport"
+          },
+          {
+            "stationCode": "DED",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIDN",
+            "fullName": "Dehradun",
+            "shortName": "Dehradun",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "301123N",
+                "longitude": "0781049E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "UT",
+              "cityCode": "DED",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Dehradun Airport"
+          },
+          {
+            "stationCode": "DEL",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIDP",
+            "fullName": "Delhi",
+            "shortName": "Delhi",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "283359N",
+                "longitude": "0770611E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "DL",
+              "cityCode": "DEL",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Indira Gandhi International Airport"
+          },
+          {
+            "stationCode": "DHM",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Dharamshala",
+            "shortName": "Dharamshala",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "320955N",
+                "longitude": "0761538E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "HP",
+              "cityCode": "DHM",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Kangra Airport"
+          },
+          {
+            "stationCode": "DOH",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OTBD",
+            "fullName": "Doha",
+            "shortName": "Doha",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "251525N",
+                "longitude": "0513359E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "QA",
+              "provinceStateCode": null,
+              "cityCode": "DOH",
+              "timeZoneCode": "QA",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Qatar"
+            },
+            "airport": "Hamad International Airport"
+          },
+          {
+            "stationCode": "DXB",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OMDB",
+            "fullName": "Dubai",
+            "shortName": "Dubai",
+            "macCode": "DXB",
+            "currencyCode": "AED",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "\u0000",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "251510N",
+                "longitude": "0552152E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "AE",
+              "provinceStateCode": "DU",
+              "cityCode": "DXB",
+              "timeZoneCode": "AE",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "United Arab Emirates"
+            },
+            "airport": "Dubai International Airport"
+          },
+          {
+            "stationCode": "DWC",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Dubai, Al Maktoum International",
+            "shortName": "Dubai, Al Maktoum International",
+            "macCode": "DXB",
+            "currencyCode": "AED",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "245346N",
+                "longitude": "0550936E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "AE",
+              "provinceStateCode": "DU",
+              "cityCode": "DXB",
+              "timeZoneCode": "AE",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "United Arab Emirates"
+            },
+            "airport": "Al Maktoum International Airport"
+          },
+          {
+            "stationCode": "FJR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OMFJ",
+            "fullName": "Fujairah",
+            "shortName": "Fujairah",
+            "macCode": null,
+            "currencyCode": "AED",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "250644N",
+                "longitude": "0561926E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "AE",
+              "provinceStateCode": "DU",
+              "cityCode": "FJR",
+              "timeZoneCode": "AE",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "United Arab Emirates"
+            },
+            "airport": "Fujairah Airport"
+          },
+          {
+            "stationCode": "GOX",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Goa",
+            "shortName": "Goa",
+            "macCode": "GOI",
+            "currencyCode": "INR",
+            "conversionCurrencyCode": "INR",
+            "cultureCode": "en-GB",
+            "class": "\u0000",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "154354N",
+                "longitude": "0735205E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GA",
+              "cityCode": "GOX",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "North Goa"
+          },
+          {
+            "stationCode": "GOI",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAGO",
+            "fullName": "Goa",
+            "shortName": "Goa",
+            "macCode": "GOI",
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "\u0000",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "152300N",
+                "longitude": "0735000E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GA",
+              "cityCode": "GOI",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Goa International Airport"
+          },
+          {
+            "stationCode": "GOP",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VEGK",
+            "fullName": "Gorakhpur",
+            "shortName": "Gorakhpur",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "264428N",
+                "longitude": "0832700E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "UP",
+              "cityCode": "GOP",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Mahayogi Gorakhnath Airport"
+          },
+          {
+            "stationCode": "GAU",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VEGT",
+            "fullName": "Guwahati",
+            "shortName": "Guwahati",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "260622N",
+                "longitude": "0913509E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "AS",
+              "cityCode": "GAU",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Lokpriya Gopinath Bordoloi International Airport"
+          },
+          {
+            "stationCode": "HYD",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Hyderabad",
+            "shortName": "Hyderabad",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "171352N",
+                "longitude": "0782553E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "TS",
+              "cityCode": "HYD",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Rajiv Gandhi International Airport"
+          },
+          {
+            "stationCode": "IMF",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VEIM",
+            "fullName": "Imphal",
+            "shortName": "Imphal",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "244536N",
+                "longitude": "0935348E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "MN",
+              "cityCode": "IMF",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Bir Tikendrajit International Airport"
+          },
+          {
+            "stationCode": "IDR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAID",
+            "fullName": "Indore",
+            "shortName": "Indore",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "224318N",
+                "longitude": "0754804E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "MP",
+              "cityCode": "IDR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Devi Ahilyabai Holkar International Airport"
+          },
+          {
+            "stationCode": "JAI",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIJP",
+            "fullName": "Jaipur",
+            "shortName": "Jaipur",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "264918N",
+                "longitude": "0754822E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "RJ",
+              "cityCode": "JAI",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Jaipur International Airport"
+          },
+          {
+            "stationCode": "JSA",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIJR",
+            "fullName": "Jaisalmer",
+            "shortName": "Jaisalmer",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "265319N",
+                "longitude": "0705154E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "RJ",
+              "cityCode": "JSA",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Jaisalmer Airport"
+          },
+          {
+            "stationCode": "AIP",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Jalandhar",
+            "shortName": "Jalandhar",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "312558N",
+                "longitude": "0754532E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "PB",
+              "cityCode": "AIP",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Adampur Airport"
+          },
+          {
+            "stationCode": "IXJ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIJU",
+            "fullName": "Jammu",
+            "shortName": "Jammu",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "324121N",
+                "longitude": "0745015E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "JK",
+              "cityCode": "IXJ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Jammu Airport"
+          },
+          {
+            "stationCode": "JGA",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAJM",
+            "fullName": "Jamnagar",
+            "shortName": "Jamnagar",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": "INR",
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "222756N",
+                "longitude": "0700045E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GJ",
+              "cityCode": "JGA",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Jamnagar Airport"
+          },
+          {
+            "stationCode": "JED",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OEJN",
+            "fullName": "Jeddah",
+            "shortName": "Jeddah",
+            "macCode": null,
+            "currencyCode": "SAR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "214046N",
+                "longitude": "0390924E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "SA",
+              "provinceStateCode": null,
+              "cityCode": "JED",
+              "timeZoneCode": "SA",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Saudi Arabia"
+            },
+            "airport": "King Abdulaziz International Airport"
+          },
+          {
+            "stationCode": "JDH",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIJO",
+            "fullName": "Jodhpur",
+            "shortName": "Jodhpur",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "261504N",
+                "longitude": "0730256E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "RJ",
+              "cityCode": "JDH",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Jodhpur Airport"
+          },
+          {
+            "stationCode": "IXY",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAKE",
+            "fullName": "Kandla",
+            "shortName": "Kandla",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "230646N",
+                "longitude": "0700602E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GJ",
+              "cityCode": "IXY",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Kandla Airport"
+          },
+          {
+            "stationCode": "KNU",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIKA",
+            "fullName": "Kanpur",
+            "shortName": "Kanpur",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "262626N",
+                "longitude": "0802202E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "UP",
+              "cityCode": "KNU",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Kanpur Airport"
+          },
+          {
+            "stationCode": "KTM",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VNKT",
+            "fullName": "Kathmandu",
+            "shortName": "Kathmandu",
+            "macCode": null,
+            "currencyCode": "NPR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "274148N",
+                "longitude": "0852133E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "NP",
+              "provinceStateCode": "BA",
+              "cityCode": "KTM",
+              "timeZoneCode": "NP",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Nepal"
+            },
+            "airport": "Tribhuvan International Airport"
+          },
+          {
+            "stationCode": "HJR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAKJ",
+            "fullName": "Khajuraho",
+            "shortName": "Khajuraho",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "244902N",
+                "longitude": "0795507E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "MP",
+              "cityCode": "HJR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Khajuraho Airport"
+          },
+          {
+            "stationCode": "COK",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VOCI",
+            "fullName": "Kochi",
+            "shortName": "Kochi",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "100907N",
+                "longitude": "0762407E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "KL",
+              "cityCode": "COK",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Cochin International Airport"
+          },
+          {
+            "stationCode": "CCU",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VECC",
+            "fullName": "Kolkata",
+            "shortName": "Kolkata",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "223917N",
+                "longitude": "0882648E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "WB",
+              "cityCode": "CCU",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Netaji Subhash Chandra Bose International Airport"
+          },
+          {
+            "stationCode": "CCJ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VOCL",
+            "fullName": "Kozhikode",
+            "shortName": "Kozhikode",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "110813N",
+                "longitude": "0755719E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "KL",
+              "cityCode": "CCJ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Kozhikode International Airport"
+          },
+          {
+            "stationCode": "IXL",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VILH",
+            "fullName": "Leh",
+            "shortName": "Leh",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "340809N",
+                "longitude": "0773247E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "JK",
+              "cityCode": "IXL",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Leh Kushok Bakula Rimpochee Airport"
+          },
+          {
+            "stationCode": "LKO",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VILK",
+            "fullName": "Lucknow",
+            "shortName": "Lucknow",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "264537N",
+                "longitude": "0805249E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "UP",
+              "cityCode": "LKO",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Chaudhary Charan Singh International Airport"
+          },
+          {
+            "stationCode": "HWR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Ludhiana",
+            "shortName": "Ludhiana",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "304458N",
+                "longitude": "0753728E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "PB",
+              "cityCode": "HWR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Ludhiana Airport"
+          },
+          {
+            "stationCode": "MFM",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VMMC",
+            "fullName": "Macau Airport",
+            "shortName": "Macau Airport",
+            "macCode": null,
+            "currencyCode": "USD",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "220858N",
+                "longitude": "1133530E"
+              },
+              "zoneCode": "32",
+              "subZoneCode": "320",
+              "countryCode": "MO",
+              "provinceStateCode": null,
+              "cityCode": "MFM",
+              "timeZoneCode": "MO",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": ""
+            },
+            "airport": "Macau Airport"
+          },
+          {
+            "stationCode": "IXM",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VOMD",
+            "fullName": "Madurai",
+            "shortName": "Madurai",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "094957N",
+                "longitude": "0780517E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "TN",
+              "cityCode": "IXM",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Madurai Airport"
+          },
+          {
+            "stationCode": "MLE",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VRMM",
+            "fullName": "Male",
+            "shortName": "Male",
+            "macCode": null,
+            "currencyCode": "USD",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "041130N",
+                "longitude": "0733145E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "MV",
+              "provinceStateCode": "MA",
+              "cityCode": "MLE",
+              "timeZoneCode": "MV",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Maldives"
+            },
+            "airport": "Velana International Airport"
+          },
+          {
+            "stationCode": "MED",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OEMA",
+            "fullName": "Medina (Madinah)",
+            "shortName": "Medina (Madinah)",
+            "macCode": null,
+            "currencyCode": "SAR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "243312N",
+                "longitude": "0394218E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "SA",
+              "provinceStateCode": null,
+              "cityCode": "MED",
+              "timeZoneCode": "SA",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Saudi Arabia"
+            },
+            "airport": "Prince Mohammed Bin Abdulaziz International Airport"
+          },
+          {
+            "stationCode": "BOM",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VABB",
+            "fullName": "Mumbai",
+            "shortName": "Mumbai",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "190519N",
+                "longitude": "0725205E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "MH",
+              "cityCode": "BOM",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Chhatrapati Shivaji Maharaj International Airport"
+          },
+          {
+            "stationCode": "MCT",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OOMS",
+            "fullName": "Muscat",
+            "shortName": "Muscat",
+            "macCode": null,
+            "currencyCode": "OMR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "233534N",
+                "longitude": "0581654E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "OM",
+              "provinceStateCode": null,
+              "cityCode": "MCT",
+              "timeZoneCode": "OM",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Oman"
+            },
+            "airport": "Muscat International Airport"
+          },
+          {
+            "stationCode": "NAG",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VANP",
+            "fullName": "Nagpur",
+            "shortName": "Nagpur",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "210528N",
+                "longitude": "0790259E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "MH",
+              "cityCode": "NAG",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Dr. Babasaheb Ambedkar International Airport"
+          },
+          {
+            "stationCode": "NJF",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Najaf",
+            "shortName": "Najaf",
+            "macCode": null,
+            "currencyCode": "USD",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "315923N",
+                "longitude": "0442415E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "IQ",
+              "provinceStateCode": null,
+              "cityCode": "NJF",
+              "timeZoneCode": "IQ",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": ""
+            },
+            "airport": "Najaf Airport"
+          },
+          {
+            "stationCode": "PAT",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VEPT",
+            "fullName": "Patna",
+            "shortName": "Patna",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "253529N",
+                "longitude": "0850517E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "BR",
+              "cityCode": "PAT",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Jay Prakash Narayan International Airport"
+          },
+          {
+            "stationCode": "HKT",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VTSP",
+            "fullName": "Phuket",
+            "shortName": "Phuket",
+            "macCode": null,
+            "currencyCode": "THB",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "080644N",
+                "longitude": "0981819E"
+              },
+              "zoneCode": "32",
+              "subZoneCode": "320",
+              "countryCode": "TH",
+              "provinceStateCode": null,
+              "cityCode": "HKT",
+              "timeZoneCode": "TH",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Thailand"
+            },
+            "airport": "Phuket"
+          },
+          {
+            "stationCode": "PBD",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAPR",
+            "fullName": "Porbandar",
+            "shortName": "Porbandar",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "213855N",
+                "longitude": "0693926E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GJ",
+              "cityCode": "PBD",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Porbandar Airport"
+          },
+          {
+            "stationCode": "IXZ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VOPB",
+            "fullName": "Port Blair",
+            "shortName": "Port Blair",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "113828N",
+                "longitude": "0924347E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "AN",
+              "cityCode": "IXZ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Veer Savarkar International Airport"
+          },
+          {
+            "stationCode": "IXD",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIAL",
+            "fullName": "Prayagraj",
+            "shortName": "Prayagraj",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "252624N",
+                "longitude": "0814402E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "UP",
+              "cityCode": "IXD",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Prayagraj Airport"
+          },
+          {
+            "stationCode": "PNQ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAPO",
+            "fullName": "Pune",
+            "shortName": "Pune",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "183456N",
+                "longitude": "0735511E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "MH",
+              "cityCode": "PNQ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Pune International Airport"
+          },
+          {
+            "stationCode": "RPR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VARP",
+            "fullName": "Raipur",
+            "shortName": "Raipur",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "211000N",
+                "longitude": "0820030E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "CT",
+              "cityCode": "RPR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Swami Vivekananda Airport"
+          },
+          {
+            "stationCode": "HSR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAHS",
+            "fullName": "Rajkot International Airport",
+            "shortName": "Hirasar",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "221829N",
+                "longitude": "0704825E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GJ",
+              "cityCode": "RAJ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Rajkot International Airport"
+          },
+          {
+            "stationCode": "IXR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VERC",
+            "fullName": "Ranchi",
+            "shortName": "Ranchi",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "231851N",
+                "longitude": "0851918E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "JH",
+              "cityCode": "IXR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Birsa Munda Airport"
+          },
+          {
+            "stationCode": "RKT",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OMRK",
+            "fullName": "Ras Al-Khaimah",
+            "shortName": "Ras Al-Khaimah",
+            "macCode": "DXB",
+            "currencyCode": "AED",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "254500N",
+                "longitude": "0560000E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "AE",
+              "provinceStateCode": "RK",
+              "cityCode": "RKT",
+              "timeZoneCode": "AE",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "United Arab Emirates"
+            },
+            "airport": "Ras Al-Khaimah Airport"
+          },
+          {
+            "stationCode": "RUH",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OERK",
+            "fullName": "Riyadh",
+            "shortName": "Riyadh",
+            "macCode": null,
+            "currencyCode": "SAR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "245728N",
+                "longitude": "0464156E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "SA",
+              "provinceStateCode": null,
+              "cityCode": "RUH",
+              "timeZoneCode": "SA",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "Saudi Arabia"
+            },
+            "airport": "King Khalid International Airport"
+          },
+          {
+            "stationCode": "SHJ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "OMSJ",
+            "fullName": "Sharjah",
+            "shortName": "Sharjah",
+            "macCode": "DXB",
+            "currencyCode": "AED",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "252045N",
+                "longitude": "0552345E"
+              },
+              "zoneCode": "22",
+              "subZoneCode": "220",
+              "countryCode": "AE",
+              "provinceStateCode": "SH",
+              "cityCode": "SHJ",
+              "timeZoneCode": "AE",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "United Arab Emirates"
+            },
+            "airport": "Sharjah Airport"
+          },
+          {
+            "stationCode": "SHL",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Shillong",
+            "shortName": "Shillong",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "254213N",
+                "longitude": "0915839E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "ML",
+              "cityCode": "SHL",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Shillong Airport"
+          },
+          {
+            "stationCode": "RQY",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VOSH",
+            "fullName": "Shivamogga",
+            "shortName": "Shivamogga",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "\u0000",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "135117N",
+                "longitude": "0753638E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "KA",
+              "cityCode": "RQY",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Shivamogga"
+          },
+          {
+            "stationCode": "SXR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VISR",
+            "fullName": "Srinagar",
+            "shortName": "Srinagar",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "335917N",
+                "longitude": "0744631E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "JK",
+              "cityCode": "SXR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Sheikh Ul-Alam International Airport Srinagar"
+          },
+          {
+            "stationCode": "STV",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VASU",
+            "fullName": "Surat",
+            "shortName": "Surat",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "210651N",
+                "longitude": "0724430E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GJ",
+              "cityCode": "STV",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Surat International Airport"
+          },
+          {
+            "stationCode": "TRV",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VOTV",
+            "fullName": "Thiruvananthapuram",
+            "shortName": "Thiruvananthapuram",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "082856N",
+                "longitude": "0765512E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "KL",
+              "cityCode": "TRV",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Trivandrum International Airport"
+          },
+          {
+            "stationCode": "TIR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VOTP",
+            "fullName": "Tirupati",
+            "shortName": "Tirupati",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "133800N",
+                "longitude": "0793300E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "AP",
+              "cityCode": "TIR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Tirupati International Airport"
+          },
+          {
+            "stationCode": "TCR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": null,
+            "fullName": "Tuticorin",
+            "shortName": "Tuticorin",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "084324N",
+                "longitude": "0780135E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "TN",
+              "cityCode": "TCR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Tuticorin Airport"
+          },
+          {
+            "stationCode": "UDR",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VAUD",
+            "fullName": "Udaipur",
+            "shortName": "Udaipur",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "243654N",
+                "longitude": "0735346E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "RJ",
+              "cityCode": "UDR",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Maharana Pratap Airport"
+          },
+          {
+            "stationCode": "BDQ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VABO",
+            "fullName": "Vadodara",
+            "shortName": "Vadodara",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "222010N",
+                "longitude": "0731335E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "GJ",
+              "cityCode": "BDQ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Vadodara"
+          },
+          {
+            "stationCode": "VNS",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VIBN",
+            "fullName": "Varanasi",
+            "shortName": "Varanasi",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "252707N",
+                "longitude": "0825147E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "UP",
+              "cityCode": "VNS",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Lal Bahadur Shastri International Airport"
+          },
+          {
+            "stationCode": "VTZ",
+            "inActive": false,
+            "allowed": true,
+            "icaoCode": "VEVZ",
+            "fullName": "Vishakhapatnam",
+            "shortName": "Vishakhapatnam",
+            "macCode": null,
+            "currencyCode": "INR",
+            "conversionCurrencyCode": null,
+            "cultureCode": "en-GB",
+            "class": "A",
+            "locationDetails": {
+              "coordinates": {
+                "latitude": "174316N",
+                "longitude": "0831328E"
+              },
+              "zoneCode": "33",
+              "subZoneCode": "330",
+              "countryCode": "IN",
+              "provinceStateCode": "AP",
+              "cityCode": "VTZ",
+              "timeZoneCode": "IN",
+              "thirdPartyControlled": false,
+              "customsRequiredForCrew": false,
+              "weightType": 2,
+              "country": "India"
+            },
+            "airport": "Visakhapatnam International Airport"
+          }
+        ]
+      }
+    }
+  ]
+]

@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.env
+yatra_browser_profile/
+browser_profile/
+debug_dumps/
+scraper.log
+*.png
+.pytest_cache/

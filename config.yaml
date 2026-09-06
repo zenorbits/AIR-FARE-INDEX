@@ -1,0 +1,19 @@
+routes:
+  - origin: "DEL"
+    destination: "BOM"
+  - origin: "DEL"
+    destination: "BLR"
+  - origin: "BLR"
+    destination: "HYD"
+  - origin: "BOM"
+    destination: "BLR"
+  - origin: "DEL"
+    destination: "CCU"
+  - origin: "MAA"
+    destination: "DEL"
+lead_time_days:
+  - 1
+  - 7
+  - 15
+  - 30
+  - 45
