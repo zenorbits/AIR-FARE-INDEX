@@ -40,9 +40,9 @@ def insert_flights(engine, flights_data: List[Dict[str, Any]]) -> int:
         for flight in flights_data:
             stmt = insert(FlightPrice).values(**flight)
             
-            # On conflict (flight_number, departure_time, scraped_hour), do nothing
+            # On conflict (source, flight_number, departure_time, scraped_hour), do nothing
             stmt = stmt.on_conflict_do_nothing(
-                index_elements=["flight_number", "departure_time", "scraped_hour"]
+                index_elements=["source", "flight_number", "departure_time", "scraped_hour"]
             )
             
             result = session.execute(stmt)

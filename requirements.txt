@@ -7,3 +7,4 @@ python-dotenv==1.0.1
 playwright-stealth==1.0.6
 fastapi
 uvicorn
+psutil

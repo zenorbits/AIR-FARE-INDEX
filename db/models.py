@@ -24,10 +24,11 @@ class FlightPrice(Base):
 
     __table_args__ = (
         UniqueConstraint(
+            "source",
             "flight_number", 
             "departure_time", 
             "scraped_hour", 
-            name="uq_flight_departure_scraped_hour"
+            name="uq_source_flight_departure_scraped_hour"
         ),
     )
 
