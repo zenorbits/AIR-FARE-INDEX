@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from scraper.yatra import YatraScraper
 from scraper.cleartrip import ClearTripScraper
 from db.database import get_engine, init_db, insert_flights
+from cleaning.pipeline import run_pipeline
+from index_calc.jevons import calculate_index
 
 # Setup logging
 logging.basicConfig(
@@ -107,6 +109,29 @@ def main():
         logger.info(f"Summary for {scraper_name}: Returned {scraper_rows_returned} rows, Inserted {scraper_rows_inserted} rows, Elapsed time {elapsed_time:.2f} seconds.")
 
     logger.info(f"Run completed. Total new flights inserted: {total_inserted}")
+
+    pipeline_failed = False
+    logger.info("Starting cleaning pipeline...")
+    start_time_pipeline = time.time()
+    try:
+        run_pipeline()
+        elapsed_time_pipeline = time.time() - start_time_pipeline
+        logger.info(f"Cleaning pipeline completed successfully, Elapsed time {elapsed_time_pipeline:.2f} seconds.")
+    except Exception as e:
+        pipeline_failed = True
+        logger.error(f"Cleaning pipeline failed:\n{traceback.format_exc()}")
+
+    logger.info("Starting index calculation...")
+    if pipeline_failed:
+        logger.warning("Cleaning pipeline failed previously. Index calculation is running on potentially stale clean data.")
+        
+    start_time_index = time.time()
+    try:
+        calculate_index()
+        elapsed_time_index = time.time() - start_time_index
+        logger.info(f"Index calculation completed successfully, Elapsed time {elapsed_time_index:.2f} seconds.")
+    except Exception as e:
+        logger.error(f"Index calculation failed:\n{traceback.format_exc()}")
 
 if __name__ == "__main__":
     main()
