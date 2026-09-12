@@ -10,8 +10,11 @@ from datetime import date, datetime
 from fastapi import FastAPI, Depends, Query, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import desc, asc, func
+
+from ml.predict import predict_fare, get_model_metadata, PredictionInputError
 
 # Import existing database setup and models
 from db.database import get_engine
@@ -31,6 +34,22 @@ def verify_api_key(api_key: str = Depends(api_key_header)):
             detail="Invalid or missing API key"
         )
     return api_key
+
+class PredictPriceRequest(BaseModel):
+    route: str = Field(..., min_length=1, description="e.g. DEL-BOM")
+    airline: str = Field(..., min_length=1, description="IATA code or name, e.g. 6E or IndiGo")
+    cabin_class: str = Field(..., min_length=1, description="e.g. Economy")
+    lead_time_days: int = Field(..., ge=0, le=365)
+    stops: int = Field(..., ge=0, le=5)
+    departure_hour: int = Field(..., ge=0, le=23)
+    departure_day_of_week: int = Field(..., ge=0, le=6, description="0=Monday, 6=Sunday")
+    departure_month: int = Field(..., ge=1, le=12)
+
+
+class PredictPriceResponse(BaseModel):
+    predicted_fare: float
+    currency: str = "INR"
+    model_trained_at: Optional[str] = None
 
 app = FastAPI(title="Airfare API")
 
@@ -202,3 +221,24 @@ def get_routes(
 ):
     results = db.query(FlightPriceClean.route).distinct().all()
     return [r[0] for r in results if r[0] is not None]
+
+@app.post("/predict-price", response_model=PredictPriceResponse)
+def predict_price(
+    payload: PredictPriceRequest,
+    api_key: str = Depends(verify_api_key)
+):
+    try:
+        fare = predict_fare(**payload.model_dump())
+    except FileNotFoundError as e:
+        raise HTTPException(
+            status_code=503,
+            detail="Price model has not been trained yet. Run `python -m ml.train`.",
+        ) from e
+    except PredictionInputError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+    metadata = get_model_metadata() or {}
+    return PredictPriceResponse(
+        predicted_fare=fare,
+        model_trained_at=metadata.get("trained_at"),
+    )

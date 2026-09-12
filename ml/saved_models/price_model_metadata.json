@@ -1,0 +1,63 @@
+{
+  "trained_at": "2026-09-12T14:41:13.081279+00:00",
+  "target": "total_fare",
+  "features": [
+    "route",
+    "airline",
+    "cabin_class",
+    "stops",
+    "lead_time_days",
+    "departure_hour",
+    "departure_day_of_week",
+    "departure_month"
+  ],
+  "categorical_features": [
+    "route",
+    "airline",
+    "cabin_class"
+  ],
+  "numeric_features": [
+    "stops",
+    "lead_time_days",
+    "departure_hour",
+    "departure_day_of_week",
+    "departure_month"
+  ],
+  "n_rows_raw": 9119,
+  "n_rows_after_cleaning": 8992,
+  "n_train": 7193,
+  "n_test": 1799,
+  "model_type": "RandomForestRegressor",
+  "model_params": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": 10,
+    "max_features": "sqrt",
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 15,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 300,
+    "n_jobs": -1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "train_metrics": {
+    "mae": 732.2002587826139,
+    "rmse": 1320.6572971596984,
+    "r2": 0.8076567456025525,
+    "n": 7193
+  },
+  "test_metrics": {
+    "mae": 930.6587727010971,
+    "rmse": 1657.1322837884443,
+    "r2": 0.6650494864719779,
+    "n": 1799
+  }
+}
