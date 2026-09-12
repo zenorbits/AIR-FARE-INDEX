@@ -8,6 +8,3 @@ debug_dumps/
 scraper.log
 *.png
 .pytest_cache/
-cleartrip_browser_profile/
-.git.zip
-*_diff.txt
