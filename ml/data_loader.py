@@ -63,12 +63,14 @@ def load_from_db() -> pd.DataFrame:
     cleaning.pipeline.FlightPriceClean). Requires DATABASE_URL to be set."""
     # Imported lazily so this module doesn't hard-require SQLAlchemy/DB
     # env vars just to run offline CSV-based training.
+    from sqlalchemy import text
     from db.database import get_engine
     from cleaning.pipeline import FlightPriceClean
 
     engine = get_engine()
     query = "SELECT * FROM flight_prices_clean"
-    df = pd.read_sql(query, engine.raw_connection())
+    with engine.connect() as conn:
+        df = pd.read_sql(text(query), conn)
     logger.info("Loaded %d rows from database table flight_prices_clean", len(df))
     return df
 
