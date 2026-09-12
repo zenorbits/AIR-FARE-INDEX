@@ -113,9 +113,10 @@ def predict_fare(
     departure_hour: int,
     departure_day_of_week: int,
     departure_month: int,
+    source: str = "cleartrip",
 ) -> float:
     """Predict total_fare (INR) for a single flight, using the trained
-    RandomForestRegressor pipeline. Raises PredictionInputError on invalid
+    HistGradientBoostingRegressor pipeline. Raises PredictionInputError on invalid
     input (unknown-but-well-formed categories are allowed through and
     handled by the encoder as an unseen category, rather than rejected --
     only structurally invalid values raise)."""
@@ -137,6 +138,7 @@ def predict_fare(
         route=route,
         airline=normalized_airline,
         cabin_class=cabin_class,
+        source=source,
         lead_time_days=lead_time_days,
         stops=stops,
         departure_hour=departure_hour,

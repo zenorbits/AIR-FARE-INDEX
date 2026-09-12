@@ -25,7 +25,8 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.compose import TransformedTargetRegressor
+from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
@@ -96,22 +97,22 @@ def build_pipeline() -> Pipeline:
         remainder="passthrough",  # numeric features pass through unchanged
     )
 
-    # NOTE on these hyperparameters: an initial pass with max_depth=12,
-    # min_samples_leaf=3 fit the training data almost perfectly (train
-    # MAE ~284) but generalized poorly (test MAE ~893, a 3.1x gap) --
-    # classic overfitting, since many rows are near-duplicate
-    # observations of the same flight and a deep, low-leaf-count forest
-    # was memorizing individual scrape snapshots rather than the
-    # underlying fare pattern. Constraining depth and raising the
-    # minimum leaf size trades a bit of training accuracy for much
-    # better generalization (test MAE ~931, gap shrinks to ~1.3x).
-    model = RandomForestRegressor(
-        n_estimators=300,
-        max_depth=10,
-        min_samples_leaf=15,
-        max_features="sqrt",
-        random_state=42,
-        n_jobs=-1,
+    # NOTE on these hyperparameters: the previous depth-10 RandomForest was tuned before 
+    # source was a feature; with source included, gradient boosting on a log-transformed 
+    # target measured better on the same time-aware split (test MAE ~815 vs ~931, R2 ~0.74 vs ~0.67); 
+    # the log target is used because fares are right-skewed; and that this variant has a 
+    # wider train/test gap (~2.6x vs ~1.3x) which is an accepted trade-off for better test performance.
+    model = TransformedTargetRegressor(
+        regressor=HistGradientBoostingRegressor(
+            max_iter=400,
+            learning_rate=0.06,
+            max_depth=6,
+            min_samples_leaf=20,
+            l2_regularization=1.0,
+            random_state=42,
+        ),
+        func=np.log1p,
+        inverse_func=np.expm1,
     )
 
     return Pipeline(steps=[("preprocess", preprocessor), ("model", model)])
@@ -146,7 +147,7 @@ def main(csv_path: str | None = None, prefer: str = "auto") -> dict:
     X_test, y_test = test_df[ALL_FEATURES], test_df[TARGET_COLUMN]
 
     pipeline = build_pipeline()
-    logger.info("Training RandomForestRegressor on %d rows...", len(X_train))
+    logger.info("Training HistGradientBoostingRegressor(log-target) on %d rows...", len(X_train))
     pipeline.fit(X_train, y_train)
 
     train_metrics = evaluate(pipeline, X_train, y_train)
@@ -180,8 +181,8 @@ def main(csv_path: str | None = None, prefer: str = "auto") -> dict:
         "n_rows_after_cleaning": int(len(featured_df)),
         "n_train": len(X_train),
         "n_test": len(X_test),
-        "model_type": "RandomForestRegressor",
-        "model_params": pipeline.named_steps["model"].get_params(),
+        "model_type": "HistGradientBoostingRegressor(log-target)",
+        "model_params": pipeline.named_steps["model"].regressor.get_params(),
         "train_metrics": train_metrics,
         "test_metrics": test_metrics,
     }

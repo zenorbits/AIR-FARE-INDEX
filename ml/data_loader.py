@@ -68,7 +68,7 @@ def load_from_db() -> pd.DataFrame:
 
     engine = get_engine()
     query = "SELECT * FROM flight_prices_clean"
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, engine.raw_connection())
     logger.info("Loaded %d rows from database table flight_prices_clean", len(df))
     return df
 

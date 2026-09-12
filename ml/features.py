@@ -7,6 +7,10 @@ transformations are applied at train time and at prediction time.
 
 Target variable: total_fare
 Excluded predictors (target leakage): total_fare, base_fare, taxes_fees
+
+Note: source is included as a feature because Yatra returns only the cheapest
+fare per airline while Cleartrip returns every flight, meaning the two sources
+have systematically different fare distributions.
 """
 
 from __future__ import annotations
@@ -46,13 +50,14 @@ REQUIRED_RAW_COLUMNS = [
     "flight_number",
     "airline",
     "cabin_class",
+    "source",
     "stops",
     "lead_time_days",
     "departure_time",
 ]
 
 # Final feature columns fed into the model
-CATEGORICAL_FEATURES = ["route", "airline", "cabin_class"]
+CATEGORICAL_FEATURES = ["route", "airline", "cabin_class", "source"]
 NUMERIC_FEATURES = [
     "stops",
     "lead_time_days",
@@ -152,6 +157,7 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     # 4. Normalize cabin_class
     out["cabin_class"] = out["cabin_class"].astype(str).str.strip().str.upper()
+    out["source"] = out["source"].astype(str).str.strip().str.lower()
 
     # 5. Canonicalize airline
     out["airline"] = out.apply(
@@ -220,6 +226,7 @@ def build_single_prediction_row(
     departure_hour: int,
     departure_day_of_week: int,
     departure_month: int,
+    source: str = "cleartrip",
 ) -> pd.DataFrame:
     """Build a single-row DataFrame in the exact shape the trained model
     pipeline expects, for a live prediction request. No cleaning is applied
@@ -229,6 +236,7 @@ def build_single_prediction_row(
         "route": str(route).strip().upper(),
         "airline": str(airline).strip(),
         "cabin_class": str(cabin_class).strip().upper(),
+        "source": str(source).strip().lower(),
         "stops": int(stops),
         "lead_time_days": int(lead_time_days),
         "departure_hour": int(departure_hour),
