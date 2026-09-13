@@ -1,28 +1,69 @@
 import { useEffect, useState } from "react";
 import { getHeatmapRoutes } from "../api/client";
 
-// Simplified silhouette of India, hand-traced to a 0-1000 x 0-1000 viewBox.
+// Simplified silhouette of India, hand-traced to a 0-800 x 0-950 viewBox.
 // This keeps the component dependency-free (no GeoJSON/topojson fetch) while
 // still giving recognizable geography for the route arcs to sit on top of.
 // Swap for a proper GeoJSON/TopoJSON-driven map later if more precision is needed.
 const INDIA_OUTLINE = `
-M 430 40
-L 470 60 L 500 90 L 560 110 L 610 140 L 640 190 L 660 230
-L 690 260 L 720 300 L 700 340 L 730 380 L 710 420 L 690 400
-L 660 440 L 630 470 L 600 500 L 580 540 L 560 580 L 520 600
-L 500 650 L 480 700 L 460 750 L 440 800 L 420 850 L 400 890
-L 385 850 L 375 800 L 360 830 L 340 800 L 330 750 L 310 720
-L 290 680 L 270 640 L 260 600 L 240 560 L 230 520 L 220 480
-L 210 440 L 200 400 L 220 360 L 210 320 L 230 280 L 250 250
-L 240 210 L 260 180 L 290 160 L 310 130 L 340 110 L 360 80
-L 390 60 Z
+M 420 20
+L 460 40 L 500 70 L 520 110 L 560 130 L 610 150
+L 650 180 L 700 190 L 750 230 L 730 270 L 690 260
+L 660 290 L 690 330 L 670 380 L 630 420 L 600 460
+L 580 510 L 560 560 L 540 610 L 510 660 L 480 710
+L 450 760 L 420 810 L 400 860 L 385 905 L 370 860
+L 350 810 L 330 760 L 300 720 L 290 680 L 270 630
+L 250 580 L 235 530 L 225 480 L 220 430 L 215 380
+L 220 330 L 200 290 L 210 250 L 230 210 L 250 170
+L 270 130 L 300 100 L 330 70 L 360 45 Z
 `;
 
-function intensityColor(intensity) {
-  // Interpolate from cool (low demand) to hot (high demand).
-  const hue = 260 - intensity * 220; // 260 (indigo) -> ~40 (amber/red)
-  return `hsl(${hue}, 90%, ${60 - intensity * 10}%)`;
+// Sequential single-hue (blue) ramp — magnitude should read as one hue from
+// dim to bright, never a rainbow. Values are the validated palette's
+// sequential blue steps (see the dataviz skill's reference palette).
+// Because the dashboard is dark-themed, low intensity recedes toward the
+// dark surface (darkest step) and high intensity pops brighter (lightest step).
+const SEQUENTIAL_BLUE = [
+  "#0d366b", // step 700 — recedes into the dark surface (low demand)
+  "#184f95", // step 600
+  "#1c5cab", // step 550
+  "#256abf", // step 500
+  "#2a78d6", // step 450
+  "#3987e5", // step 400
+  "#5598e7", // step 350
+  "#6da7ec", // step 300
+  "#86b6ef", // step 250 — pops against the dark surface (high demand)
+];
+
+function lerpColor(a, b, t) {
+  const ah = parseInt(a.slice(1), 16);
+  const bh = parseInt(b.slice(1), 16);
+  const ar = (ah >> 16) & 0xff,
+    ag = (ah >> 8) & 0xff,
+    ab = ah & 0xff;
+  const br = (bh >> 16) & 0xff,
+    bg = (bh >> 8) & 0xff,
+    bb = bh & 0xff;
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return `rgb(${r}, ${g}, ${bl})`;
 }
+
+function intensityColor(intensity) {
+  const clamped = Math.min(1, Math.max(0, intensity));
+  const steps = SEQUENTIAL_BLUE.length - 1;
+  const pos = clamped * steps;
+  const i = Math.min(steps - 1, Math.floor(pos));
+  return lerpColor(SEQUENTIAL_BLUE[i], SEQUENTIAL_BLUE[i + 1], pos - i);
+}
+
+const LABEL_OFFSET = {
+  top: { dx: 0, dy: -14, anchor: "middle" },
+  bottom: { dx: 0, dy: 22, anchor: "middle" },
+  left: { dx: -12, dy: 4, anchor: "end" },
+  right: { dx: 12, dy: 4, anchor: "start" },
+};
 
 export default function RouteHeatmap() {
   const [routes, setRoutes] = useState([]);
@@ -44,7 +85,10 @@ export default function RouteHeatmap() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-white font-semibold text-lg">India Route Heatmap</h2>
         <div className="flex items-center gap-2 text-xs text-white/45">
-          <span className="inline-block h-2 w-6 rounded-full" style={{ background: "linear-gradient(90deg, hsl(260,90%,60%), hsl(40,90%,50%))" }} />
+          <span
+            className="inline-block h-2 w-16 rounded-full"
+            style={{ background: `linear-gradient(90deg, ${SEQUENTIAL_BLUE[0]}, ${SEQUENTIAL_BLUE[SEQUENTIAL_BLUE.length - 1]})` }}
+          />
           low → high demand
         </div>
       </div>
@@ -53,7 +97,7 @@ export default function RouteHeatmap() {
         <div className="h-[420px] rounded-xl bg-white/5 animate-pulse" />
       ) : (
         <div className="relative flex justify-center">
-          <svg viewBox="170 10 590 900" className="w-full max-w-sm h-[420px]">
+          <svg viewBox="180 0 600 930" className="w-full max-w-sm h-[440px]">
             <path
               d={INDIA_OUTLINE}
               fill="rgba(255,255,255,0.06)"
@@ -79,7 +123,7 @@ export default function RouteHeatmap() {
                   stroke={intensityColor(r.intensity)}
                   strokeWidth={2 + r.intensity * 8}
                   strokeLinecap="round"
-                  opacity={isHovered ? 1 : 0.55 + r.intensity * 0.3}
+                  opacity={isHovered ? 1 : 0.7 + r.intensity * 0.25}
                   onMouseEnter={() => setHovered(key)}
                   onMouseLeave={() => setHovered(null)}
                   style={{ cursor: "pointer", transition: "opacity 0.15s" }}
@@ -91,21 +135,27 @@ export default function RouteHeatmap() {
               );
             })}
 
-            {Object.entries(cities).map(([code, c]) => (
-              <g key={code}>
-                <circle cx={c.x} cy={c.y} r={7} fill="#0b1020" stroke="#e5e7eb" strokeWidth="2" />
-                <text
-                  x={c.x}
-                  y={c.y - 12}
-                  textAnchor="middle"
-                  fontSize="16"
-                  fill="rgba(255,255,255,0.8)"
-                  fontWeight="600"
-                >
-                  {code}
-                </text>
-              </g>
-            ))}
+            {Object.entries(cities).map(([code, c]) => {
+              const { dx, dy, anchor } = LABEL_OFFSET[c.labelPos] ?? LABEL_OFFSET.top;
+              return (
+                <g key={code}>
+                  <circle cx={c.x} cy={c.y} r={7} fill="#0b1020" stroke="#e5e7eb" strokeWidth="2" />
+                  <text
+                    x={c.x + dx}
+                    y={c.y + dy}
+                    textAnchor={anchor}
+                    fontSize="17"
+                    fontWeight="600"
+                    fill="rgba(255,255,255,0.9)"
+                    stroke="#0b1020"
+                    strokeWidth="3"
+                    paintOrder="stroke"
+                  >
+                    {code}
+                  </text>
+                </g>
+              );
+            })}
           </svg>
 
           {hovered && (

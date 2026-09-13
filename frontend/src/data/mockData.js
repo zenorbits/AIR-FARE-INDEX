@@ -15,18 +15,20 @@
 // ---------------------------------------------------------------------------
 
 // City coordinates used to plot the India route heatmap (SVG viewBox space,
-// pre-projected for a 0-1000 x 0-1000 canvas roughly matching India's outline).
+// pre-projected for a 0-800 x 0-950 canvas roughly matching India's outline).
+// `labelPos` tells RouteHeatmap which side to place the text label on, so
+// closely-spaced cities (e.g. the Mumbai/Pune/Goa cluster) don't overlap.
 export const CITY_COORDS = {
-  DEL: { name: "Delhi", x: 430, y: 190 },
-  BOM: { name: "Mumbai", x: 260, y: 520 },
-  BLR: { name: "Bengaluru", x: 400, y: 730 },
-  MAA: { name: "Chennai", x: 470, y: 760 },
-  CCU: { name: "Kolkata", x: 690, y: 400 },
-  HYD: { name: "Hyderabad", x: 420, y: 610 },
-  GOI: { name: "Goa", x: 300, y: 600 },
-  PNQ: { name: "Pune", x: 300, y: 550 },
-  COK: { name: "Kochi", x: 380, y: 830 },
-  AMD: { name: "Ahmedabad", x: 260, y: 420 },
+  DEL: { name: "Delhi", x: 460, y: 190, labelPos: "top" },
+  AMD: { name: "Ahmedabad", x: 270, y: 420, labelPos: "left" },
+  BOM: { name: "Mumbai", x: 250, y: 520, labelPos: "left" },
+  PNQ: { name: "Pune", x: 320, y: 560, labelPos: "right" },
+  GOI: { name: "Goa", x: 280, y: 655, labelPos: "left" },
+  HYD: { name: "Hyderabad", x: 440, y: 605, labelPos: "right" },
+  BLR: { name: "Bengaluru", x: 400, y: 745, labelPos: "bottom" },
+  MAA: { name: "Chennai", x: 480, y: 765, labelPos: "right" },
+  COK: { name: "Kochi", x: 345, y: 835, labelPos: "bottom" },
+  CCU: { name: "Kolkata", x: 605, y: 420, labelPos: "right" },
 };
 
 // Top 6 routes ranked by current Airfare Price Index (APIX).
