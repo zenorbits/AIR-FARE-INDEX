@@ -14,22 +14,22 @@
 //   GET /api/heatmap         -> HEATMAP_ROUTES
 // ---------------------------------------------------------------------------
 
-// City coordinates used to plot the India route heatmap (SVG viewBox space,
-// pre-projected to roughly match each city's real position on the India
-// outline traced in RouteHeatmap.jsx (viewBox "40 0 560 630").
+// Real city coordinates ([longitude, latitude]) used to plot the India route
+// heatmap with react-simple-maps, which projects them onto the actual India
+// coastline (src/data/indiaGeo.json — regenerate via scripts/extract-india-geo.js).
 // `labelPos` tells RouteHeatmap which side to place the text label on, so
 // closely-spaced cities (e.g. the Mumbai/Pune/Goa cluster) don't overlap.
 export const CITY_COORDS = {
-  DEL: { name: "Delhi", x: 290, y: 150, labelPos: "top" },
-  AMD: { name: "Ahmedabad", x: 140, y: 290, labelPos: "left" },
-  BOM: { name: "Mumbai", x: 175, y: 360, labelPos: "left" },
-  PNQ: { name: "Pune", x: 205, y: 390, labelPos: "right" },
-  GOI: { name: "Goa", x: 205, y: 440, labelPos: "left" },
-  HYD: { name: "Hyderabad", x: 290, y: 400, labelPos: "right" },
-  BLR: { name: "Bengaluru", x: 250, y: 480, labelPos: "bottom" },
-  MAA: { name: "Chennai", x: 330, y: 470, labelPos: "right" },
-  COK: { name: "Kochi", x: 250, y: 540, labelPos: "bottom" },
-  CCU: { name: "Kolkata", x: 400, y: 290, labelPos: "right" },
+  DEL: { name: "Delhi", coordinates: [77.1025, 28.7041], labelPos: "top" },
+  AMD: { name: "Ahmedabad", coordinates: [72.5714, 23.0225], labelPos: "left" },
+  BOM: { name: "Mumbai", coordinates: [72.8777, 19.076], labelPos: "left" },
+  PNQ: { name: "Pune", coordinates: [73.8567, 18.5204], labelPos: "right" },
+  GOI: { name: "Goa", coordinates: [73.8278, 15.4909], labelPos: "left" },
+  HYD: { name: "Hyderabad", coordinates: [78.4867, 17.385], labelPos: "right" },
+  BLR: { name: "Bengaluru", coordinates: [77.5946, 12.9716], labelPos: "bottom" },
+  MAA: { name: "Chennai", coordinates: [80.2707, 13.0827], labelPos: "right" },
+  COK: { name: "Kochi", coordinates: [76.2673, 9.9312], labelPos: "bottom" },
+  CCU: { name: "Kolkata", coordinates: [88.3639, 22.5726], labelPos: "right" },
 };
 
 // Top 6 routes ranked by current Airfare Price Index (APIX).

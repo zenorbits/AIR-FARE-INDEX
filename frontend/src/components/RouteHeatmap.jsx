@@ -1,22 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ComposableMap, Geographies, Geography } from "react-simple-maps";
+import { geoMercator } from "d3-geo";
+import indiaGeo from "../data/indiaGeo.json";
 import { getHeatmapRoutes } from "../api/client";
 
-// Simplified silhouette of India, hand-traced to match real geography:
-// the Kashmir tip in the north, the northeast states reached through the
-// narrow Siliguri corridor, the Kutch/Gujarat bulge in the west, and the
-// coastline tapering south to Kanyakumari. Dependency-free (no GeoJSON/
-// topojson fetch needed) — swap for a proper GeoJSON-driven map later if
-// more precision is required.
-const INDIA_OUTLINE = `
-M 240 20 L 280 45 L 260 90 L 300 110 L 360 130
-L 410 150 L 430 165 L 460 155 L 500 140 L 545 160
-L 560 200 L 530 230 L 500 260 L 470 240 L 445 210
-L 420 230 L 405 270 L 385 320 L 370 370 L 355 420
-L 335 470 L 310 520 L 290 570 L 300 600 L 270 580
-L 245 545 L 225 500 L 210 460 L 195 420 L 180 380
-L 165 340 L 150 300 L 120 270 L 85 250 L 70 220
-L 100 195 L 115 160 L 130 120 L 160 80 L 200 50 Z
-`;
+// India's real coastline as GeoJSON (Natural Earth, via react-simple-maps +
+// d3-geo) instead of a hand-drawn SVG silhouette — see
+// scripts/extract-india-geo.js for how src/data/indiaGeo.json was generated.
+const MAP_WIDTH = 480;
+const MAP_HEIGHT = 560;
 
 // Sequential single-hue (blue) ramp — magnitude should read as one hue from
 // dim to bright, never a rainbow. Values are the validated palette's
@@ -59,10 +51,10 @@ function intensityColor(intensity) {
 }
 
 const LABEL_OFFSET = {
-  top: { dx: 0, dy: -14, anchor: "middle" },
-  bottom: { dx: 0, dy: 22, anchor: "middle" },
-  left: { dx: -12, dy: 4, anchor: "end" },
-  right: { dx: 12, dy: 4, anchor: "start" },
+  top: { dx: 0, dy: -10, anchor: "middle" },
+  bottom: { dx: 0, dy: 16, anchor: "middle" },
+  left: { dx: -9, dy: 3, anchor: "end" },
+  right: { dx: 9, dy: 3, anchor: "start" },
 };
 
 export default function RouteHeatmap() {
@@ -79,6 +71,19 @@ export default function RouteHeatmap() {
       setLoading(false);
     });
   }, []);
+
+  const projection = useMemo(
+    () => geoMercator().center([82.8, 22.5]).scale(880).translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]),
+    [],
+  );
+
+  const projected = useMemo(() => {
+    const map = {};
+    Object.entries(cities).forEach(([code, c]) => {
+      map[code] = projection(c.coordinates);
+    });
+    return map;
+  }, [cities, projection]);
 
   return (
     <section className="glass p-5 md:p-6">
@@ -97,31 +102,50 @@ export default function RouteHeatmap() {
         <div className="h-[420px] rounded-xl bg-white/5 animate-pulse" />
       ) : (
         <div className="relative flex justify-center">
-          <svg viewBox="40 0 550 630" className="w-full max-w-sm h-[440px]">
-            <path
-              d={INDIA_OUTLINE}
-              fill="rgba(255,255,255,0.06)"
-              stroke="rgba(255,255,255,0.25)"
-              strokeWidth="2"
-            />
+          <ComposableMap
+            projection={projection}
+            width={MAP_WIDTH}
+            height={MAP_HEIGHT}
+            style={{ width: "100%", maxWidth: 380, height: "auto" }}
+          >
+            <Geographies geography={indiaGeo}>
+              {({ geographies }) =>
+                geographies.map((geo) => (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill="rgba(255,255,255,0.06)"
+                    stroke="rgba(255,255,255,0.3)"
+                    strokeWidth={1}
+                    style={{
+                      default: { outline: "none" },
+                      hover: { outline: "none" },
+                      pressed: { outline: "none" },
+                    }}
+                  />
+                ))
+              }
+            </Geographies>
 
             {routes.map((r) => {
-              const from = cities[r.from];
-              const to = cities[r.to];
+              const from = projected[r.from];
+              const to = projected[r.to];
               if (!from || !to) return null;
 
-              const mx = (from.x + to.x) / 2;
-              const my = (from.y + to.y) / 2 - 40; // arc bulge
+              const [x1, y1] = from;
+              const [x2, y2] = to;
+              const mx = (x1 + x2) / 2;
+              const my = (y1 + y2) / 2 - 26; // arc bulge
               const key = `${r.from}-${r.to}`;
               const isHovered = hovered === key;
 
               return (
                 <path
                   key={key}
-                  d={`M ${from.x} ${from.y} Q ${mx} ${my} ${to.x} ${to.y}`}
+                  d={`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`}
                   fill="none"
                   stroke={intensityColor(r.intensity)}
-                  strokeWidth={2 + r.intensity * 8}
+                  strokeWidth={1.5 + r.intensity * 6}
                   strokeLinecap="round"
                   opacity={isHovered ? 1 : 0.7 + r.intensity * 0.25}
                   onMouseEnter={() => setHovered(key)}
@@ -136,19 +160,23 @@ export default function RouteHeatmap() {
             })}
 
             {Object.entries(cities).map(([code, c]) => {
+              const pos = projected[code];
+              if (!pos) return null;
+              const [x, y] = pos;
               const { dx, dy, anchor } = LABEL_OFFSET[c.labelPos] ?? LABEL_OFFSET.top;
+
               return (
                 <g key={code}>
-                  <circle cx={c.x} cy={c.y} r={7} fill="#0b1020" stroke="#e5e7eb" strokeWidth="2" />
+                  <circle cx={x} cy={y} r={4} fill="#0b1020" stroke="#e5e7eb" strokeWidth={1.5} />
                   <text
-                    x={c.x + dx}
-                    y={c.y + dy}
+                    x={x + dx}
+                    y={y + dy}
                     textAnchor={anchor}
-                    fontSize="17"
+                    fontSize="11"
                     fontWeight="600"
                     fill="rgba(255,255,255,0.9)"
                     stroke="#0b1020"
-                    strokeWidth="3"
+                    strokeWidth="2.5"
                     paintOrder="stroke"
                   >
                     {code}
@@ -156,7 +184,7 @@ export default function RouteHeatmap() {
                 </g>
               );
             })}
-          </svg>
+          </ComposableMap>
 
           {hovered && (
             <div className="absolute top-2 right-2 glass px-3 py-2 rounded-lg text-xs text-white/85 border border-white/15">
