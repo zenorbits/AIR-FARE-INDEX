@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { getHeatmapRoutes } from "../api/client";
 
-// Simplified silhouette of India, hand-traced to a 0-800 x 0-950 viewBox.
-// This keeps the component dependency-free (no GeoJSON/topojson fetch) while
-// still giving recognizable geography for the route arcs to sit on top of.
-// Swap for a proper GeoJSON/TopoJSON-driven map later if more precision is needed.
+// Simplified silhouette of India, hand-traced to match real geography:
+// the Kashmir tip in the north, the northeast states reached through the
+// narrow Siliguri corridor, the Kutch/Gujarat bulge in the west, and the
+// coastline tapering south to Kanyakumari. Dependency-free (no GeoJSON/
+// topojson fetch needed) — swap for a proper GeoJSON-driven map later if
+// more precision is required.
 const INDIA_OUTLINE = `
-M 420 20
-L 460 40 L 500 70 L 520 110 L 560 130 L 610 150
-L 650 180 L 700 190 L 750 230 L 730 270 L 690 260
-L 660 290 L 690 330 L 670 380 L 630 420 L 600 460
-L 580 510 L 560 560 L 540 610 L 510 660 L 480 710
-L 450 760 L 420 810 L 400 860 L 385 905 L 370 860
-L 350 810 L 330 760 L 300 720 L 290 680 L 270 630
-L 250 580 L 235 530 L 225 480 L 220 430 L 215 380
-L 220 330 L 200 290 L 210 250 L 230 210 L 250 170
-L 270 130 L 300 100 L 330 70 L 360 45 Z
+M 240 20 L 280 45 L 260 90 L 300 110 L 360 130
+L 410 150 L 430 165 L 460 155 L 500 140 L 545 160
+L 560 200 L 530 230 L 500 260 L 470 240 L 445 210
+L 420 230 L 405 270 L 385 320 L 370 370 L 355 420
+L 335 470 L 310 520 L 290 570 L 300 600 L 270 580
+L 245 545 L 225 500 L 210 460 L 195 420 L 180 380
+L 165 340 L 150 300 L 120 270 L 85 250 L 70 220
+L 100 195 L 115 160 L 130 120 L 160 80 L 200 50 Z
 `;
 
 // Sequential single-hue (blue) ramp — magnitude should read as one hue from
@@ -97,7 +97,7 @@ export default function RouteHeatmap() {
         <div className="h-[420px] rounded-xl bg-white/5 animate-pulse" />
       ) : (
         <div className="relative flex justify-center">
-          <svg viewBox="180 0 600 930" className="w-full max-w-sm h-[440px]">
+          <svg viewBox="40 0 550 630" className="w-full max-w-sm h-[440px]">
             <path
               d={INDIA_OUTLINE}
               fill="rgba(255,255,255,0.06)"
