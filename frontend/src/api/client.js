@@ -20,6 +20,7 @@ import {
   TREND_DATA,
   HEATMAP_ROUTES,
   CITY_COORDS,
+  routeLabel,
 } from "../data/mockData";
 
 // Base URL of the FastAPI backend. Matches the uvicorn dev default
@@ -53,15 +54,6 @@ async function apiFetch(path) {
 // APIx is a Jevons price index computed against this baseline (see
 // Backend/index_calc/jevons.py) — not returned by the API itself.
 const INDEX_BASELINE = 100;
-
-function cityName(code) {
-  return CITY_COORDS[code]?.name ?? code;
-}
-
-function routeLabel(route) {
-  const [origin, destination] = route.split("-");
-  return { origin: cityName(origin), destination: cityName(destination) };
-}
 
 async function fetchCurrentIndexRows() {
   const rows = await apiFetch("/index/current?frequency=daily&lead_time_days=overall");

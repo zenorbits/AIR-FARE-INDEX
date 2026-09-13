@@ -32,6 +32,19 @@ export const CITY_COORDS = {
   CCU: { name: "Kolkata", coordinates: [88.3639, 22.5726], labelPos: "right" },
 };
 
+// Full city name for a code, e.g. "DEL" -> "Delhi". Falls back to the code
+// itself for anything not in CITY_COORDS. Used to build hover tooltips
+// wherever a route/city code is shown in its short form.
+export function cityName(code) {
+  return CITY_COORDS[code]?.name ?? code;
+}
+
+// "DEL-BOM" -> { origin: "Delhi", destination: "Mumbai" }
+export function routeLabel(route) {
+  const [origin, destination] = route.split("-");
+  return { origin: cityName(origin), destination: cityName(destination) };
+}
+
 // Top 6 routes ranked by current Airfare Price Index (APIX).
 // `change` is the % move vs. the previous period (positive = index up).
 export const TOP_ROUTES = [

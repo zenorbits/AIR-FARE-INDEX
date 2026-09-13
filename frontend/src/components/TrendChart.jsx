@@ -11,6 +11,7 @@ import {
   Legend,
 } from "recharts";
 import { getTrends, getTopRoutes } from "../api/client";
+import { routeLabel } from "../data/mockData";
 
 const LINE_COLORS = ["#818cf8", "#38bdf8", "#f472b6", "#4ade80", "#fbbf24", "#fb7185"];
 
@@ -73,7 +74,7 @@ export default function TrendChart({ selectedRoute, onSelectRoute }) {
               className="bg-white/10 border border-white/15 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-400"
             >
               {routes.map((r) => (
-                <option key={r.route} value={r.route} className="bg-slate-800">
+                <option key={r.route} value={r.route} title={`${r.origin} → ${r.destination}`} className="bg-slate-800">
                   {r.route}
                 </option>
               ))}
@@ -105,10 +106,35 @@ export default function TrendChart({ selectedRoute, onSelectRoute }) {
                   color: "#fff",
                 }}
                 labelStyle={{ color: "rgba(255,255,255,0.6)" }}
+                formatter={(value, name) => {
+                  const { origin, destination } = routeLabel(name);
+                  return [value, `${name} (${origin} → ${destination})`];
+                }}
               />
               {mode === "all" ? (
                 <>
-                  <Legend wrapperStyle={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }} />
+                  <Legend
+                    content={({ payload }) => (
+                      <ul className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-3 text-xs">
+                        {payload.map((entry) => {
+                          const { origin, destination } = routeLabel(entry.value);
+                          return (
+                            <li
+                              key={entry.value}
+                              className="flex items-center gap-1.5"
+                              title={`${origin} → ${destination}`}
+                            >
+                              <span
+                                className="inline-block h-2 w-2 rounded-full"
+                                style={{ background: entry.color }}
+                              />
+                              <span style={{ color: "rgba(255,255,255,0.6)" }}>{entry.value}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  />
                   {routes.map((r) => (
                     <Line
                       key={r.route}
