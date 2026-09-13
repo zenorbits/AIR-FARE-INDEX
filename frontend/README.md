@@ -1,16 +1,39 @@
-# React + Vite
+# Airfare Index Dashboard — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React (Vite) + Tailwind dashboard for the Airfare Price Index (APIX).
 
-Currently, two official plugins are available:
+## Run it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+By default this runs against mock data (`src/data/mockData.js`) so the
+dashboard is fully interactive without a backend.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Connect to the real backend
 
-## Expanding the Oxlint configuration
+1. Start the backend (see `../Backend/README.md`) — it listens on
+   `http://localhost:8000` by default.
+2. In this folder, copy the env template and fill in the API key so it
+   matches the backend's `Backend/.env`:
+   ```bash
+   cp .env.example .env
+   ```
+3. Restart `npm run dev`. `src/api/client.js` now calls the real endpoints
+   (`/index/current`, `/index/history`) instead of the mock data — if the
+   backend is unreachable it falls back to mock data automatically and logs
+   a warning to the console.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+**Note:** the backend requires an `X-API-Key` header on every data endpoint.
+`VITE_API_KEY` ships inside the browser bundle, which is fine for local
+development but not for a public deployment — see the warning at the top of
+`src/api/client.js` for what to do instead (an authenticating proxy, or a
+separate public read-only endpoint).
+
+## Regenerating the India map data
+
+`src/data/indiaGeo.json` (India's coastline, used by the heatmap) is
+extracted from `world-atlas`. To regenerate it, see
+`scripts/extract-india-geo.js`.
