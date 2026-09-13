@@ -21,6 +21,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Retrain the price prediction model once per day rather than on every
+# 2-hourly run: retraining is cheap but rewrites the model artifact, and a
+# stable daily version makes predictions reproducible between runs.
+RETRAIN_AT_HOUR = 2
+
 def load_config(config_path="config.yaml"):
     with open(config_path, "r") as f:
         return yaml.safe_load(f)
@@ -132,6 +137,32 @@ def main():
         logger.info(f"Index calculation completed successfully, Elapsed time {elapsed_time_index:.2f} seconds.")
     except Exception as e:
         logger.error(f"Index calculation failed:\n{traceback.format_exc()}")
+
+    current_hour = datetime.now().hour
+    if current_hour == RETRAIN_AT_HOUR:
+        logger.info("Starting price model retraining (scheduled daily at hour %d)...", RETRAIN_AT_HOUR)
+        start_time_train = time.time()
+        try:
+            from ml.train import main as train_model
+            metadata = train_model(prefer="db")
+            elapsed_time_train = time.time() - start_time_train
+            test_metrics = metadata.get("test_metrics", {})
+            logger.info(
+                "Price model retrained successfully in %.2f seconds. "
+                "Rows: %s, test MAE: %.2f, test R2: %.3f",
+                elapsed_time_train,
+                metadata.get("n_rows_after_cleaning"),
+                test_metrics.get("mae", float("nan")),
+                test_metrics.get("r2", float("nan")),
+            )
+        except Exception:
+            logger.error(f"Price model retraining failed:\n{traceback.format_exc()}")
+    else:
+        logger.info(
+            "Skipping price model retraining (runs at hour %d, current hour is %d)",
+            RETRAIN_AT_HOUR,
+            current_hour,
+        )
 
 if __name__ == "__main__":
     main()

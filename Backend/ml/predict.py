@@ -39,6 +39,7 @@ KNOWN_AIRLINES = set(AIRLINE_CODE_MAP.values())
 _model_lock = threading.Lock()
 _pipeline = None
 _metadata: Optional[dict] = None
+_loaded_mtime: Optional[float] = None
 
 
 class PredictionInputError(ValueError):
@@ -46,18 +47,29 @@ class PredictionInputError(ValueError):
 
 
 def _load_model():
-    global _pipeline, _metadata
+    global _pipeline, _metadata, _loaded_mtime
     with _model_lock:
-        if _pipeline is None:
-            if not MODEL_PATH.exists():
-                raise FileNotFoundError(
-                    f"No trained model found at {MODEL_PATH}. Run `python -m ml.train` first."
-                )
+        if not MODEL_PATH.exists():
+            raise FileNotFoundError(
+                f"No trained model found at {MODEL_PATH}. Run `python -m ml.train` first."
+            )
+
+        current_mtime = MODEL_PATH.stat().st_mtime
+
+        # Reload if we have never loaded, or if the file on disk is newer
+        # than the copy we hold. The scheduled nightly retrain rewrites this
+        # file, and without this check a long-running API process would keep
+        # serving the previous model until manually restarted.
+        if _pipeline is None or _loaded_mtime != current_mtime:
             _pipeline = joblib.load(MODEL_PATH)
+            _loaded_mtime = current_mtime
             logger.info("Loaded price prediction model from %s", MODEL_PATH)
             if METADATA_PATH.exists():
                 with open(METADATA_PATH) as f:
                     _metadata = json.load(f)
+            else:
+                _metadata = None
+
     return _pipeline
 
 

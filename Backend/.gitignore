@@ -1,10 +1,23 @@
+# Virtual environments
 venv/
-__pycache__/
+**/venv/
+
+# Python
+**/__pycache__/
 *.pyc
-.env
-yatra_browser_profile/
-browser_profile/
-debug_dumps/
-scraper.log
-*.png
 .pytest_cache/
+
+# Secrets
+.env
+**/.env
+
+# Runtime artifacts
+**/*.log
+**/debug_dumps/
+**/*_browser_profile/
+
+# Antigravity scratch files
+patch*.py
+*_diff
+*_diff.txt
+*.png
