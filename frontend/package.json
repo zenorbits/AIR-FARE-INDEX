@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "d3-geo": "^3.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-simple-maps": "^5.0.5",
     "recharts": "^3.10.1"
   },
   "devDependencies": {
