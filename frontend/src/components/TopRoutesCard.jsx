@@ -63,7 +63,9 @@ export default function TopRoutesCard({ selectedRoute, onSelectRoute }) {
                   <TrendBadge change={r.change} />
                 </div>
                 <p className="text-2xl font-bold text-white tracking-tight">{r.index.toFixed(1)}</p>
-                <p className="text-xs text-white/40 mt-0.5">{r.route}</p>
+                <p className="text-xs text-white/40 mt-0.5" title={`${r.origin} → ${r.destination}`}>
+                  {r.route}
+                </p>
               </button>
             );
           })}

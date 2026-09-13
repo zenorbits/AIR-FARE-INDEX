@@ -153,7 +153,8 @@ export default function RouteHeatmap() {
                   style={{ cursor: "pointer", transition: "opacity 0.15s" }}
                 >
                   <title>
-                    {r.from} → {r.to} · index {r.index.toFixed(1)}
+                    {cities[r.from]?.name ?? r.from} → {cities[r.to]?.name ?? r.to} · index{" "}
+                    {r.index.toFixed(1)}
                   </title>
                 </path>
               );
@@ -167,6 +168,7 @@ export default function RouteHeatmap() {
 
               return (
                 <g key={code}>
+                  <title>{c.name}</title>
                   <circle cx={x} cy={y} r={4} fill="#0b1020" stroke="#e5e7eb" strokeWidth={1.5} />
                   <text
                     x={x + dx}
@@ -194,7 +196,7 @@ export default function RouteHeatmap() {
                 return (
                   <>
                     <p className="font-semibold">
-                      {r.from} → {r.to}
+                      {cities[r.from]?.name ?? r.from} → {cities[r.to]?.name ?? r.to}
                     </p>
                     <p className="text-white/50">Index: {r.index.toFixed(1)}</p>
                   </>

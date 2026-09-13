@@ -40,7 +40,9 @@ export default function ApixPanel() {
                 className="glass p-4 rounded-xl border border-white/10 flex items-center justify-between gap-4"
               >
                 <div>
-                  <p className="text-sm font-medium text-white/90">{r.route}</p>
+                  <p className="text-sm font-medium text-white/90" title={`${r.origin} → ${r.destination}`}>
+                    {r.route}
+                  </p>
                   <p className="text-xs text-white/40">
                     weekly avg {detail?.weeklyAvg.toFixed(1)} · monthly avg {detail?.monthlyAvg.toFixed(1)}
                   </p>
