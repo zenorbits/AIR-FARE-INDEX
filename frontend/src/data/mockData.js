@@ -49,21 +49,21 @@ export function routeLabel(route) {
 // `change` is the % move vs. the previous period (positive = index up).
 export const TOP_ROUTES = [
   { route: "DEL-BOM", origin: "Delhi", destination: "Mumbai", index: 142.8, change: 3.4 },
-  { route: "BOM-BLR", origin: "Mumbai", destination: "Bengaluru", index: 128.5, change: -1.2 },
   { route: "DEL-BLR", origin: "Delhi", destination: "Bengaluru", index: 135.1, change: 2.1 },
+  { route: "BOM-BLR", origin: "Mumbai", destination: "Bengaluru", index: 128.5, change: -1.2 },
   { route: "DEL-CCU", origin: "Delhi", destination: "Kolkata", index: 119.6, change: -0.6 },
-  { route: "BLR-MAA", origin: "Bengaluru", destination: "Chennai", index: 108.9, change: 1.8 },
-  { route: "BOM-GOI", origin: "Mumbai", destination: "Goa", index: 121.3, change: 4.7 },
+  { route: "MAA-DEL", origin: "Chennai", destination: "Delhi", index: 118.4, change: -0.9 },
+  { route: "BLR-HYD", origin: "Bengaluru", destination: "Hyderabad", index: 99.7, change: 2.3 },
 ];
 
 // Detailed APIX numbers per route for the ApixPanel (labelled numeric display).
 export const APIX_BY_ROUTE = {
   "DEL-BOM": { current: 142.8, baseline: 100, weeklyAvg: 139.2, monthlyAvg: 133.7 },
-  "BOM-BLR": { current: 128.5, baseline: 100, weeklyAvg: 130.1, monthlyAvg: 126.4 },
   "DEL-BLR": { current: 135.1, baseline: 100, weeklyAvg: 132.0, monthlyAvg: 129.8 },
+  "BOM-BLR": { current: 128.5, baseline: 100, weeklyAvg: 130.1, monthlyAvg: 126.4 },
   "DEL-CCU": { current: 119.6, baseline: 100, weeklyAvg: 120.4, monthlyAvg: 117.9 },
-  "BLR-MAA": { current: 108.9, baseline: 100, weeklyAvg: 106.5, monthlyAvg: 104.2 },
-  "BOM-GOI": { current: 121.3, baseline: 100, weeklyAvg: 115.8, monthlyAvg: 112.0 },
+  "MAA-DEL": { current: 118.4, baseline: 100, weeklyAvg: 116.0, monthlyAvg: 113.2 },
+  "BLR-HYD": { current: 99.7, baseline: 100, weeklyAvg: 97.5, monthlyAvg: 95.0 },
 };
 
 // Trend series: one index value per route per date, for the last 14 days.
@@ -97,11 +97,11 @@ export const TREND_DATA = buildTrendData();
 // (0-1, derived from index/demand) driving line thickness & color.
 export const HEATMAP_ROUTES = [
   { from: "DEL", to: "BOM", intensity: 0.95, index: 142.8 },
-  { from: "BOM", to: "BLR", intensity: 0.75, index: 128.5 },
   { from: "DEL", to: "BLR", intensity: 0.85, index: 135.1 },
+  { from: "BOM", to: "BLR", intensity: 0.75, index: 128.5 },
   { from: "DEL", to: "CCU", intensity: 0.6, index: 119.6 },
-  { from: "BLR", to: "MAA", intensity: 0.5, index: 108.9 },
-  { from: "BOM", to: "GOI", intensity: 0.68, index: 121.3 },
+  { from: "MAA", to: "DEL", intensity: 0.58, index: 118.4 },
+  { from: "BLR", to: "HYD", intensity: 0.35, index: 99.7 },
   { from: "DEL", to: "AMD", intensity: 0.4, index: 102.5 },
   { from: "BOM", to: "PNQ", intensity: 0.3, index: 96.8 },
   { from: "BLR", to: "COK", intensity: 0.45, index: 105.2 },
