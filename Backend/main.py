@@ -1,6 +1,7 @@
 import os
 import yaml
 import logging
+from pathlib import Path
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
@@ -15,9 +16,10 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("scraper.log"),
+        logging.FileHandler(Path(__file__).resolve().parent / "scraper.log", encoding="utf-8"),
         logging.StreamHandler()
-    ]
+    ],
+    force=True
 )
 logger = logging.getLogger(__name__)
 
@@ -122,9 +124,9 @@ def main():
         run_pipeline()
         elapsed_time_pipeline = time.time() - start_time_pipeline
         logger.info(f"Cleaning pipeline completed successfully, Elapsed time {elapsed_time_pipeline:.2f} seconds.")
-    except Exception as e:
+    except Exception:
         pipeline_failed = True
-        logger.error(f"Cleaning pipeline failed:\n{traceback.format_exc()}")
+        logger.exception("Cleaning pipeline failed")
 
     logger.info("Starting index calculation...")
     if pipeline_failed:
@@ -135,8 +137,8 @@ def main():
         calculate_index()
         elapsed_time_index = time.time() - start_time_index
         logger.info(f"Index calculation completed successfully, Elapsed time {elapsed_time_index:.2f} seconds.")
-    except Exception as e:
-        logger.error(f"Index calculation failed:\n{traceback.format_exc()}")
+    except Exception:
+        logger.exception("Index calculation failed")
 
     current_hour = datetime.now().hour
     if current_hour == RETRAIN_AT_HOUR:
