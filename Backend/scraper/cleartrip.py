@@ -3,8 +3,7 @@ import logging
 import urllib.parse
 from typing import List, Dict, Any
 from datetime import datetime
-from playwright.sync_api import sync_playwright
-from playwright_stealth import stealth_sync
+from patchright.sync_api import sync_playwright
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 
 from .base import BaseScraper
@@ -52,9 +51,7 @@ class ClearTripScraper(BaseScraper):
             # Use persistent context to build cookies/history and pass Bot Managers
             context = p.chromium.launch_persistent_context(
                 user_data_dir="./cleartrip_browser_profile",
-                channel="chrome",
                 headless=False,
-                args=["--disable-blink-features=AutomationControlled"],
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 viewport={"width": 1280, "height": 720},
                 locale="en-IN",
@@ -71,7 +68,6 @@ class ClearTripScraper(BaseScraper):
                 })
                 
                 page = context.pages[0] if context.pages else context.new_page()
-                stealth_sync(page)
                 
                 # Clear localStorage and sessionStorage before navigating to prevent SPA from restoring previous search state
                 try:
@@ -82,8 +78,20 @@ class ClearTripScraper(BaseScraper):
                 
                 # Warm-up navigation
                 logger.info(f"[{self.source}] Performing warm-up navigation...")
-                page.goto("https://www.cleartrip.com/", wait_until="networkidle", timeout=60000)
+                page.goto("https://www.cleartrip.com/", wait_until="domcontentloaded", timeout=30000)
                 page.wait_for_timeout(8000)
+                
+                try:
+                    modal_closed = False
+                    close_selector = "[aria-label*='close'], [aria-label*='Close'], button:has-text('✕'), [data-testid*='close'], [data-testid*='Close']"
+                    close_btn = page.query_selector(close_selector)
+                    if close_btn and close_btn.is_visible():
+                        close_btn.click(timeout=2000)
+                        modal_closed = True
+                    page.keyboard.press("Escape")
+                    logger.info(f"[{self.source}] Modal dismissed: {modal_closed}")
+                except Exception:
+                    pass
                 
                 abck_cookie = next((c for c in context.cookies() if c['name'] == '_abck'), None)
                 if abck_cookie:
@@ -114,8 +122,101 @@ class ClearTripScraper(BaseScraper):
     
                 page.on("response", handle_response)
                 
-                # Load the page and wait for network idle to give the XHR time to fire
-                page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                # Interact with the search form
+                try:
+                    logger.info(f"[{self.source}] Filling origin: {origin}")
+                    page.click("input[placeholder='Where from?']")
+                    page.fill("input[placeholder='Where from?']", "")
+                    page.type("input[placeholder='Where from?']", origin, delay=120)
+                    page.wait_for_timeout(2000)
+                    try:
+                        page.wait_for_selector("ul", state="visible", timeout=5000)
+                        selector = f"ul:visible li:has-text('{origin}'):not(:has-text('Anywhere'))"
+                        try:
+                            page.wait_for_selector(selector, state="visible", timeout=5000)
+                            page.locator(selector).first.click()
+                        except Exception:
+                            lis = page.query_selector_all("ul:visible li")
+                            li_texts = [li.inner_text().strip() for li in lis if li.is_visible()]
+                            logger.warning(f"[{self.source}] Origin autocomplete option not found for {origin}. Visible options: {li_texts}")
+                            return []
+                    except Exception as e:
+                        logger.warning(f"[{self.source}] Origin autocomplete failed for {origin}: {e}")
+                        return []
+                except Exception as e:
+                    logger.warning(f"[{self.source}] Origin step failed: {e}")
+                    return []
+
+                try:
+                    logger.info(f"[{self.source}] Filling destination: {destination}")
+                    page.click("input[placeholder='Where to?']")
+                    page.fill("input[placeholder='Where to?']", "")
+                    page.type("input[placeholder='Where to?']", destination, delay=120)
+                    page.wait_for_timeout(2000)
+                    try:
+                        page.wait_for_selector("ul", state="visible", timeout=5000)
+                        selector = f"ul:visible li:has-text('{destination}'):not(:has-text('Anywhere'))"
+                        try:
+                            page.wait_for_selector(selector, state="visible", timeout=5000)
+                            page.locator(selector).first.click()
+                        except Exception:
+                            lis = page.query_selector_all("ul:visible li")
+                            li_texts = [li.inner_text().strip() for li in lis if li.is_visible()]
+                            logger.warning(f"[{self.source}] Destination autocomplete option not found for {destination}. Visible options: {li_texts}")
+                            return []
+                    except Exception as e:
+                        logger.warning(f"[{self.source}] Destination autocomplete failed for {destination}: {e}")
+                        return []
+                except Exception as e:
+                    logger.warning(f"[{self.source}] Destination step failed: {e}")
+                    return []
+
+                try:
+                    val_from = page.locator("input[placeholder='Where from?']").input_value()
+                    val_to = page.locator("input[placeholder='Where to?']").input_value()
+                    logger.info(f"[{self.source}] Autocomplete resolved -> From: '{val_from}', To: '{val_to}'")
+                except Exception as e:
+                    logger.info(f"[{self.source}] Could not log input values: {e}")
+
+                try:
+                    logger.info(f"[{self.source}] Selecting travel date: {travel_date}")
+                    page.click("div[data-testid='dateSelectOnward']")
+                    page.wait_for_timeout(1000)
+                    
+                    date_obj = datetime.strptime(travel_date, "%d/%m/%Y")
+                    formatted_date = date_obj.strftime("%a %b %d %Y")
+                    
+                    selector = f"div[aria-label*='{formatted_date}']"
+                    try:
+                        page.click(selector, timeout=5000)
+                    except Exception:
+                        cells = page.query_selector_all("div[aria-label*='202']")
+                        labels = [c.get_attribute("aria-label") for c in cells[:5] if c.get_attribute("aria-label")]
+                        logger.warning(f"[{self.source}] Date cell for '{formatted_date}' (from {travel_date}) not found. First 5 visible cells: {labels}")
+                        return []
+                except Exception as e:
+                    logger.warning(f"[{self.source}] Date step failed: {e}")
+                    return []
+
+                try:
+                    logger.info(f"[{self.source}] Submitting search form")
+                    enabled_submit_selector = "button:has-text('Search Flights'):not([disabled]), button:has-text('Search'):not([disabled])"
+                    try:
+                        page.wait_for_selector(enabled_submit_selector, state="visible", timeout=10000)
+                    except Exception:
+                        logger.warning(f"[{self.source}] Submit button remains disabled or not found after 10 seconds.")
+                        
+                    search_flights_btn = page.query_selector("button:has-text('Search Flights')")
+                    if search_flights_btn and search_flights_btn.is_visible():
+                        search_flights_btn.click()
+                    else:
+                        page.click("button:has-text('Search')", timeout=5000)
+                        
+                    page.wait_for_timeout(3000)
+                    logger.info(f"[{self.source}] Navigation URL after submit: {page.url}")
+                except Exception as e:
+                    logger.warning(f"[{self.source}] Submit step failed: {e}")
+                    return []
                 
                 # Wait up to 30s specifically for our data to be populated
                 for _ in range(30):
