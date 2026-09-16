@@ -52,6 +52,7 @@ class ClearTripScraper(BaseScraper):
             # Use persistent context to build cookies/history and pass Bot Managers
             context = p.chromium.launch_persistent_context(
                 user_data_dir="./cleartrip_browser_profile",
+                channel="chrome",
                 headless=False,
                 args=["--disable-blink-features=AutomationControlled"],
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -78,6 +79,17 @@ class ClearTripScraper(BaseScraper):
                 except Exception:
                     pass
                 context.add_init_script("try { window.localStorage.clear(); window.sessionStorage.clear(); } catch(e) {}")
+                
+                # Warm-up navigation
+                logger.info(f"[{self.source}] Performing warm-up navigation...")
+                page.goto("https://www.cleartrip.com/", wait_until="networkidle", timeout=60000)
+                page.wait_for_timeout(8000)
+                
+                abck_cookie = next((c for c in context.cookies() if c['name'] == '_abck'), None)
+                if abck_cookie:
+                    logger.info(f"[{self.source}] _abck cookie present: {abck_cookie['value'][:40]}")
+                else:
+                    logger.info(f"[{self.source}] _abck cookie not found")
                 
                 def handle_response(response):
                     nonlocal captured_data
