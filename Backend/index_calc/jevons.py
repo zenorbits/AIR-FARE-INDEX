@@ -1,7 +1,7 @@
 import os
 import math
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from collections import defaultdict
 from dotenv import load_dotenv
 
@@ -28,9 +28,9 @@ logger = logging.getLogger(__name__)
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 # 1. Configurable constants for Base Period
-# If both are None, they will be auto-detected from MIN(scraped_hour)
-BASE_PERIOD_START = None
-BASE_PERIOD_END = None
+# First day both Yatra and Cleartrip were live; earlier days are Yatra-only and not comparable.
+BASE_PERIOD_START = date(2026, 9, 11)
+BASE_PERIOD_END = date(2026, 9, 11)
 
 # Route weights based on DGCA city-pair passenger traffic, May 2026 (latest month with data for all 6 routes). Source: DGCA-published monthly domestic city-pair statistics.
 ROUTE_WEIGHTS = {
@@ -132,7 +132,8 @@ def calculate_index():
             FlightPriceClean.scraped_hour,
             FlightPriceClean.total_fare
         ).filter(
-            FlightPriceClean.is_outlier == False
+            FlightPriceClean.is_outlier == False,
+            FlightPriceClean.scraped_hour >= BASE_PERIOD_START
         ).all()
         
         # Structure: period_map[frequency][(p_start, p_end)][(route, lead_time_days)] = [fare1, fare2...]
