@@ -109,6 +109,7 @@ def run_pipeline():
         
         zero_flight_rows_excluded = 0
         null_fare_rows_excluded = 0
+        connecting_rows_excluded = 0
         rows_flagged_as_outliers = 0
         rows_with_mismatch = 0
         rows_with_missing_base_tax = 0
@@ -138,6 +139,13 @@ def run_pipeline():
             # Step 2: Missing total_fare
             if raw.total_fare is None:
                 null_fare_rows_excluded += 1
+                continue
+                
+            # Step 2.5: Nonstop flights only. 
+            # Cleartrip returns only nonstop flights and Yatra returns connecting ones too, 
+            # so nonstop-only keeps the sources comparable for the Jevons index.
+            if raw.stops is None or raw.stops != 0:
+                connecting_rows_excluded += 1
                 continue
                 
             c_row = CleanRow(raw)
@@ -216,6 +224,7 @@ def run_pipeline():
         logger.info(f"Previously processed / Duplicates skipped: {duplicates_skipped}")
         logger.info(f"Zero flight rows excluded: {zero_flight_rows_excluded}")
         logger.info(f"Null fare rows excluded: {null_fare_rows_excluded}")
+        logger.info(f"Connecting rows excluded (stops > 0): {connecting_rows_excluded}")
         logger.info(f"Rows flagged as outliers: {rows_flagged_as_outliers}")
         logger.info(f"Rows with base/tax mismatch notes: {rows_with_mismatch}")
         logger.info(f"Rows with missing base/tax data notes: {rows_with_missing_base_tax}")
