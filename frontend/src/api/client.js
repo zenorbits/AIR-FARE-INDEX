@@ -70,13 +70,19 @@ async function apiPost(path, body) {
 const INDEX_BASELINE = 100;
 
 async function fetchCurrentIndexRows() {
-  const rows = await apiFetch("/index/current?frequency=daily&lead_time_days=overall");
+  // The backend does not currently write per-route rows with a NULL (overall) lead time,
+  // so we use the 30-day advance purchase window as a representative view.
+  // This should change to 'overall' once per-route blended rows are written.
+  const rows = await apiFetch("/index/current?frequency=daily&lead_time_days=30");
   return rows.filter((r) => r.route !== "overall");
 }
 
 async function fetchRouteHistory(route) {
+  // The backend does not currently write per-route rows with a NULL (overall) lead time,
+  // so we use the 30-day advance purchase window as a representative view.
+  // This should change to 'overall' once per-route blended rows are written.
   return apiFetch(
-    `/index/history?route=${encodeURIComponent(route)}&lead_time_days=overall&frequency=daily`,
+    `/index/history?route=${encodeURIComponent(route)}&lead_time_days=30&frequency=daily`,
   );
 }
 
