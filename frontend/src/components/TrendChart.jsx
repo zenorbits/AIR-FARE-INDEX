@@ -15,20 +15,19 @@ import { routeLabel } from "../data/mockData";
 
 const LINE_COLORS = ["#818cf8", "#38bdf8", "#f472b6", "#4ade80", "#fbbf24", "#fb7185"];
 
-export default function TrendChart({ selectedRoute, onSelectRoute }) {
+export default function TrendChart({ selectedRoute, onSelectRoute, leadTimeDays = 30 }) {
   const [trend, setTrend] = useState([]);
   const [routes, setRoutes] = useState([]);
   const [mode, setMode] = useState("all"); // "all" | "single"
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Swap for: fetch(`${API_BASE_URL}/api/trends`)
-    Promise.all([getTrends(), getTopRoutes()]).then(([trendData, topRoutes]) => {
+    Promise.all([getTrends(leadTimeDays), getTopRoutes(leadTimeDays)]).then(([trendData, topRoutes]) => {
       setTrend(trendData);
       setRoutes(topRoutes);
       setLoading(false);
     });
-  }, []);
+  }, [leadTimeDays]);
 
   const activeRoute = selectedRoute ?? routes[0]?.route;
 

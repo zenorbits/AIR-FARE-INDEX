@@ -16,17 +16,16 @@ function TrendBadge({ change }) {
   );
 }
 
-export default function TopRoutesCard({ selectedRoute, onSelectRoute }) {
+export default function TopRoutesCard({ selectedRoute, onSelectRoute, leadTimeDays = 30 }) {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Swap for: fetch(`${API_BASE_URL}/api/routes/top`) via api/client.js
-    getTopRoutes().then((data) => {
+    getTopRoutes(leadTimeDays).then((data) => {
       setRoutes(data);
       setLoading(false);
     });
-  }, []);
+  }, [leadTimeDays]);
 
   return (
     <section className="glass p-5 md:p-6">

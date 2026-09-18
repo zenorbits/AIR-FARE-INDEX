@@ -16,6 +16,13 @@ venv/
 **/debug_dumps/
 **/*_browser_profile/
 
+# Databases
+*.db
+
+# ML model backups (keep the live model, drop duplicates)
+ml/saved_models/*.bak
+ml/saved_models/*_backup.*
+
 # Antigravity scratch files
 patch*.py
 *_diff

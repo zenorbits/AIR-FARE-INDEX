@@ -72,3 +72,10 @@ def test_route_weights_sum():
     assert len(ROUTE_WEIGHTS) == 6
     weights_sum = sum(ROUTE_WEIGHTS.values())
     assert weights_sum == pytest.approx(1.0, abs=0.01)
+
+def test_akasa_excluded_from_queries():
+    import pathlib
+    jevons_path = pathlib.Path(__file__).parent.parent / "index_calc" / "jevons.py"
+    content = jevons_path.read_text()
+    assert "FlightPriceClean.source != 'akasa'" in content
+    assert content.count("FlightPriceClean.source != 'akasa'") >= 2

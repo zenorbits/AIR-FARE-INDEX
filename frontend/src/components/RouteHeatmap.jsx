@@ -57,20 +57,19 @@ const LABEL_OFFSET = {
   right: { dx: 9, dy: 3, anchor: "start" },
 };
 
-export default function RouteHeatmap() {
+export default function RouteHeatmap({ leadTimeDays = 30 }) {
   const [routes, setRoutes] = useState([]);
   const [cities, setCities] = useState({});
   const [hovered, setHovered] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Swap for: fetch(`${API_BASE_URL}/api/heatmap`)
-    getHeatmapRoutes().then(({ routes, cities }) => {
+    getHeatmapRoutes(leadTimeDays).then(({ routes, cities }) => {
       setRoutes(routes);
       setCities(cities);
       setLoading(false);
     });
-  }, []);
+  }, [leadTimeDays]);
 
   const projection = useMemo(
     () => geoMercator().center([82.8, 22.5]).scale(880).translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]),

@@ -1,20 +1,18 @@
 import { useEffect, useState } from "react";
 import { getApixAll, getTopRoutes } from "../api/client";
 
-export default function ApixPanel() {
+export default function ApixPanel({ leadTimeDays = 30 }) {
   const [routes, setRoutes] = useState([]);
   const [apix, setApix] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Swap for: fetch(`${API_BASE_URL}/api/index/:route`) per route,
-    // or a single fetch(`${API_BASE_URL}/api/index`) for all of them.
-    Promise.all([getTopRoutes(), getApixAll()]).then(([topRoutes, apixData]) => {
+    Promise.all([getTopRoutes(leadTimeDays), getApixAll(leadTimeDays)]).then(([topRoutes, apixData]) => {
       setRoutes(topRoutes);
       setApix(apixData);
       setLoading(false);
     });
-  }, []);
+  }, [leadTimeDays]);
 
   return (
     <section className="glass p-5 md:p-6">

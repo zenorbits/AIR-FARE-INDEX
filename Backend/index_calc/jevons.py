@@ -106,6 +106,8 @@ def calculate_index():
             FlightPriceClean.lead_time_days,
             FlightPriceClean.total_fare
         ).filter(
+            # Akasa flights already arrive via Yatra/Cleartrip; the direct feed is stored for fare decomposition and ML, but excluded here to avoid double-counting.
+            FlightPriceClean.source != 'akasa',
             FlightPriceClean.is_outlier == False,
             FlightPriceClean.scraped_hour >= BASE_PERIOD_START,
             FlightPriceClean.scraped_hour < BASE_PERIOD_END + timedelta(days=1)
@@ -132,6 +134,8 @@ def calculate_index():
             FlightPriceClean.scraped_hour,
             FlightPriceClean.total_fare
         ).filter(
+            # Akasa flights already arrive via Yatra/Cleartrip; the direct feed is stored for fare decomposition and ML, but excluded here to avoid double-counting.
+            FlightPriceClean.source != 'akasa',
             FlightPriceClean.is_outlier == False,
             FlightPriceClean.scraped_hour >= BASE_PERIOD_START
         ).all()
@@ -150,10 +154,17 @@ def calculate_index():
             d_period = get_daily_period(dt)
             period_map['daily'][d_period][r_l_key].append(row.total_fare)
             
-            w_period = get_weekly_period(dt)
+            # `all_data` is already filtered to scraped_hour >= BASE_PERIOD_START, so no
+            # pre-base observation ever lands here -- but the calendar week/month start for
+            # the base period (e.g. week of 2026-09-07, month of 2026-09-01) is still earlier
+            # than the base day itself (2026-09-11). Clamp both labels so a row's period_start
+            # never implies coverage before the base day.
+            w_start, w_end = get_weekly_period(dt)
+            w_period = (max(w_start, BASE_PERIOD_START), w_end)
             period_map['weekly'][w_period][r_l_key].append(row.total_fare)
-            
-            m_period = get_monthly_period(dt)
+
+            m_start, m_end = get_monthly_period(dt)
+            m_period = (max(m_start, BASE_PERIOD_START), m_end)
             period_map['monthly'][m_period][r_l_key].append(row.total_fare)
             
         # 4 & 5. Compute indices and prepare upsert

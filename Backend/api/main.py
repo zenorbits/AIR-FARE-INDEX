@@ -1,14 +1,17 @@
 # Runnable via: uvicorn api.main:app --reload
 
 import os
+import time
+from collections import defaultdict, deque
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from typing import List, Optional, Any, Dict
 from datetime import date, datetime, timedelta
-from fastapi import FastAPI, Depends, Query, HTTPException, status
+from fastapi import FastAPI, Depends, Query, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, asc, func
@@ -18,8 +21,9 @@ from ml.predict import predict_fare, get_model_metadata, PredictionInputError
 # Import existing database setup and models
 from index_calc.models import AirfareIndex
 from cleaning.pipeline import FlightPriceClean
+from backtest.validate import load_cpi_benchmark, load_apix_monthly, compare as compare_backtest
 
-from api.deps import get_db, verify_api_key
+from api.deps import get_db, verify_api_key, engine
 from api.assistant import router as assistant_router
 
 class PredictPriceRequest(BaseModel):
@@ -62,16 +66,58 @@ class PredictCurveResponse(BaseModel):
 app = FastAPI(title="Airfare API")
 
 
+ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:5173"]
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(assistant_router)
+
+# Simple fixed-client, sliding-window rate limit -- no external dependency,
+# adequate for a single-instance hackathon deployment. Keyed by client IP
+# since callers authenticate with a single shared API key, not per-user
+# credentials.
+#
+# The dashboard's own panels each independently re-fetch the same routes
+# (no shared cache), so a single page load can legitimately fire 100+
+# requests -- this ceiling has to comfortably clear that, it's here to catch
+# actual abuse, not normal use.
+RATE_LIMIT_MAX_REQUESTS = 600
+RATE_LIMIT_WINDOW_SECONDS = 60
+_request_log: Dict[str, deque] = defaultdict(deque)
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.monotonic()
+    window = _request_log[client_ip]
+    while window and now - window[0] > RATE_LIMIT_WINDOW_SECONDS:
+        window.popleft()
+    if len(window) >= RATE_LIMIT_MAX_REQUESTS:
+        # Raising HTTPException here would NOT be caught by FastAPI's exception
+        # handling (BaseHTTPMiddleware.dispatch sits outside ExceptionMiddleware),
+        # so it would surface as an unhandled 500 instead of a clean 429.
+        #
+        # This response also never reaches CORSMiddleware (this middleware
+        # wraps outside it), so without adding the header manually here, a
+        # rate-limited request from the browser shows up as an opaque CORS
+        # failure instead of a readable 429 -- add it ourselves for any
+        # origin the app already allows.
+        origin = request.headers.get("origin")
+        headers = {"Access-Control-Allow-Origin": origin} if origin in ALLOWED_ORIGINS else {}
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Rate limit exceeded, try again shortly"},
+            headers=headers,
+        )
+    window.append(now)
+    return await call_next(request)
 
 @app.get("/")
 def read_root():
@@ -183,6 +229,7 @@ def get_index_history(
 def get_fares_raw(
     route: Optional[str] = None,
     lead_time_days: Optional[int] = None,
+    source: Optional[str] = None,
     is_outlier: Optional[bool] = None,
     limit: int = Query(500, le=5000),
     offset: int = 0,
@@ -195,6 +242,8 @@ def get_fares_raw(
         query = query.filter(FlightPriceClean.route == route)
     if lead_time_days is not None:
         query = query.filter(FlightPriceClean.lead_time_days == lead_time_days)
+    if source:
+        query = query.filter(FlightPriceClean.source == source)
     if is_outlier is not None:
         query = query.filter(FlightPriceClean.is_outlier == is_outlier)
 
@@ -205,6 +254,7 @@ def get_fares_raw(
         response.append({
             "route": r.route,
             "lead_time_days": r.lead_time_days,
+            "source": r.source,
             "total_fare": r.total_fare,
             "base_fare": r.base_fare,
             "taxes_fees": r.taxes_fees,
@@ -212,8 +262,17 @@ def get_fares_raw(
             "scraped_hour": r.scraped_hour,
             "departure_time": r.departure_time
         })
-        
+
     return response
+
+
+@app.get("/sources")
+def get_sources(
+    db: Session = Depends(get_db),
+    api_key: str = Depends(verify_api_key)
+):
+    results = db.query(FlightPriceClean.source).distinct().all()
+    return [r[0] for r in results if r[0] is not None]
 
 @app.get("/routes")
 def get_routes(
@@ -358,3 +417,55 @@ def predict_price_curve(
         model_test_mae=mae,
         confidence_note=confidence_note,
     )
+
+
+class BacktestPoint(BaseModel):
+    period_start: str
+    cpi_index: float
+    apix_index: float
+    abs_diff: float
+    pct_diff: float
+
+
+class BacktestResponse(BaseModel):
+    benchmark: str = "MoSPI CPI Airfare item index (COICOP 07.3.3.1.2.01, base year 2024)"
+    points: List[BacktestPoint]
+    correlation: Optional[float] = None
+    mean_absolute_deviation: Optional[float] = None
+    note: Optional[str] = None
+
+
+@app.get("/backtest/cpi-comparison", response_model=BacktestResponse)
+def backtest_cpi_comparison(api_key: str = Depends(verify_api_key)):
+    """APIx vs the official CPI Airfare index, monthly. Route-level DGCA
+    average-fare data isn't publicly available, so CPI is the only benchmark
+    (see Backend/backtest/validate.py)."""
+    cpi_df = load_cpi_benchmark()
+    apix_df = load_apix_monthly(engine)
+
+    if apix_df.empty:
+        return BacktestResponse(points=[], note="No monthly APIx data available yet.")
+
+    merged, stats = compare_backtest(cpi_df, apix_df)
+    if merged.empty:
+        note = stats if isinstance(stats, str) else "No overlapping periods found."
+        return BacktestResponse(points=[], note=note)
+
+    points = [
+        BacktestPoint(
+            period_start=row.period_start.strftime("%Y-%m-%d"),
+            cpi_index=row.cpi_index,
+            apix_index=row.apix_index,
+            abs_diff=row.abs_diff,
+            pct_diff=row.pct_diff,
+        )
+        for row in merged.itertuples()
+    ]
+
+    if isinstance(stats, dict):
+        return BacktestResponse(
+            points=points,
+            correlation=stats["correlation"],
+            mean_absolute_deviation=stats["mean_absolute_deviation"],
+        )
+    return BacktestResponse(points=points, note=stats)

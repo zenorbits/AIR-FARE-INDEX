@@ -61,8 +61,8 @@ To state honestly, the system currently has a few limitations:
 - **Index base day is 2026-09-11**, the first day both sources were live.
 - **Nonstop flights only**: Cleartrip's feed is nonstop-only, so Yatra's connecting flights are excluded for comparability.
 - **Akasa Air is covered through the OTAs** (no direct scrape).
-- **Equal-Weighted Route Index**: The index uses equal weighting across all routes (DGCA traffic-based route weighting is planned but not yet implemented).
-- **No Automated Test Suite**: There is currently no automated testing pipeline setup for the repository.
+- **DGCA-Weighted Route Index**: The overall index weights each route by its DGCA-published city-pair passenger traffic share, not equal weighting.
+- **Automated Test Suite**: `Backend/tests/` has a pytest suite (`pytest -q`) covering cleaning, DB constraints, Jevons index, backtest, and the prediction endpoint.
 
 ## Folder Structure
 - `scraper/`: Contains the scraping logic and interceptors (e.g., Yatra get-fare interception).
