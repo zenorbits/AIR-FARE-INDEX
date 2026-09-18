@@ -49,7 +49,21 @@ def select_airport(page, field_selector: str, iata: str) -> None:
     confirmed afterwards.
     """
     field = page.locator(field_selector).first
-    option = page.locator("#destinations li").filter(has_text=re.compile(rf"\b{re.escape(iata)}\b"))
+    # The code and city name run together with no separator in the option's
+    # text ("DELDelhiIndira Gandhi International Airport"), so a \b-bounded
+    # regex never matches -- anchor on the start instead, where the code
+    # always appears.
+    option = page.locator("#destinations li").filter(has_text=re.compile(rf"^{re.escape(iata)}"))
+
+    city_map = {
+        "DEL": ["DELHI"],
+        "BOM": ["MUMBAI"],
+        "BLR": ["BENGALURU", "BANGALORE"],
+        "CCU": ["KOLKATA"],
+        "HYD": ["HYDERABAD"],
+        "MAA": ["CHENNAI"]
+    }
+    valid_cities = city_map.get(iata, [])
 
     last_error = "unknown error"
     for _attempt in range(2):
@@ -81,7 +95,7 @@ def select_airport(page, field_selector: str, iata: str) -> None:
             page.wait_for_timeout(300)
 
             value = field.input_value().upper()
-            if iata in value or len(value) > 3:  # shows code or city
+            if iata in value or any(city in value for city in valid_cities):
                 return
             last_error = f"field value after selection was {value!r}, expected to contain {iata!r} or city name"
         except Exception as e:

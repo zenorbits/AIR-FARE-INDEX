@@ -74,8 +74,43 @@ def test_route_weights_sum():
     assert weights_sum == pytest.approx(1.0, abs=0.01)
 
 def test_akasa_excluded_from_queries():
-    import pathlib
-    jevons_path = pathlib.Path(__file__).parent.parent / "index_calc" / "jevons.py"
-    content = jevons_path.read_text()
-    assert "FlightPriceClean.source != 'akasa'" in content
-    assert content.count("FlightPriceClean.source != 'akasa'") >= 2
+    from unittest.mock import patch
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from cleaning.pipeline import FlightPriceClean, BaseClean
+    from index_calc.models import AirfareIndex, Base as IndexBase
+    from index_calc.jevons import calculate_index
+    from datetime import date, datetime
+    
+    engine = create_engine("sqlite:///:memory:")
+    IndexBase.metadata.create_all(engine)
+    BaseClean.metadata.create_all(engine)
+    
+    Session = sessionmaker(bind=engine)
+    with Session() as session:
+        base_dt = datetime(2026, 9, 11, 10, 0, 0)
+        curr_dt = datetime(2026, 9, 12, 10, 0, 0)
+        
+        # Base period data
+        session.add(FlightPriceClean(source="yatra", route="DEL-BOM", airline="indigo", flight_number="6e1", cabin_class="economy", stops=0, departure_time=base_dt, lead_time_days=7, scraped_hour=base_dt, scraped_at=base_dt, total_fare=5000, is_outlier=False))
+        session.add(FlightPriceClean(source="yatra", route="DEL-BOM", airline="indigo", flight_number="6e2", cabin_class="economy", stops=0, departure_time=base_dt, lead_time_days=7, scraped_hour=base_dt, scraped_at=base_dt, total_fare=5000, is_outlier=False))
+        session.add(FlightPriceClean(source="akasa", route="DEL-BOM", airline="akasa", flight_number="qp1", cabin_class="economy", stops=0, departure_time=base_dt, lead_time_days=7, scraped_hour=base_dt, scraped_at=base_dt, total_fare=1000, is_outlier=False))
+        
+        # Current period data
+        session.add(FlightPriceClean(source="yatra", route="DEL-BOM", airline="indigo", flight_number="6e1", cabin_class="economy", stops=0, departure_time=curr_dt, lead_time_days=7, scraped_hour=curr_dt, scraped_at=curr_dt, total_fare=5000, is_outlier=False))
+        session.add(FlightPriceClean(source="yatra", route="DEL-BOM", airline="indigo", flight_number="6e2", cabin_class="economy", stops=0, departure_time=curr_dt, lead_time_days=7, scraped_hour=curr_dt, scraped_at=curr_dt, total_fare=5000, is_outlier=False))
+        session.add(FlightPriceClean(source="akasa", route="DEL-BOM", airline="akasa", flight_number="qp1", cabin_class="economy", stops=0, departure_time=curr_dt, lead_time_days=7, scraped_hour=curr_dt, scraped_at=curr_dt, total_fare=90000, is_outlier=False))
+        
+        session.commit()
+        
+    with patch("index_calc.jevons.get_engine", return_value=engine), \
+         patch("index_calc.jevons.BASE_PERIOD_START", date(2026, 9, 11)), \
+         patch("index_calc.jevons.BASE_PERIOD_END", date(2026, 9, 11)):
+        calculate_index()
+        
+    with Session() as session:
+        indices = session.query(AirfareIndex).filter_by(frequency="daily", route="DEL-BOM", period_start=date(2026, 9, 12)).all()
+        assert len(indices) == 1
+        # The base geomean without akasa is 5000. Current geomean without akasa is 5000. index = 100
+        # If akasa was included, the current geomean would be wildly different (1000 -> 90000).
+        assert indices[0].index_value == pytest.approx(100.0)

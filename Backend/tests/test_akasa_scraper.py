@@ -71,12 +71,17 @@ def test_scrape_flow(mock_parse, mock_sync_playwright):
     mock_page.goto.side_effect = trigger_response
     mock_parse.return_value = [{"flight": "QP-123"}]
 
-    # select_airport() checks input_value 3 times: before clear, after clear, after type
-    mock_page.locator.return_value.first.input_value.side_effect = [
-        "Delhi (DEL)", "", "Delhi (DEL)",
-        "Mumbai (BOM)", "", "Mumbai (BOM)",
-        "Delhi (DEL)", "", "Delhi (DEL)"
-    ]
+    class FakeFieldState:
+        def __init__(self):
+            self.val = "Delhi (DEL) / Mumbai (BOM)"
+        def get_val(self): return self.val
+        def fill(self, txt): self.val = txt
+        def press(self, txt, delay=None): self.val = txt
+
+    fake_state = FakeFieldState()
+    mock_page.locator.return_value.first.input_value.side_effect = fake_state.get_val
+    mock_page.locator.return_value.first.fill.side_effect = fake_state.fill
+    mock_page.locator.return_value.first.press_sequentially.side_effect = fake_state.press
 
     scraper = AkasaScraper()
     results = scraper.scrape("DEL", "BOM", "01/10/2026", 7)
@@ -96,8 +101,17 @@ def test_scrape_flow(mock_parse, mock_sync_playwright):
 
 def test_select_airport_selects_matching_option():
     mock_page = MagicMock()
-    # First call: not empty, Second call: empty after clearing, Third call: contains DEL after typing
-    mock_page.locator.return_value.first.input_value.side_effect = ["Delhi (DEL)", "", "Delhi (DEL)", "Delhi (DEL)"]
+    
+    class FakeFieldState:
+        def __init__(self): self.val = "Delhi (DEL)"
+        def get_val(self): return self.val
+        def fill(self, txt): self.val = txt
+        def press(self, txt, delay=None): self.val = txt
+        
+    fake_state = FakeFieldState()
+    mock_page.locator.return_value.first.input_value.side_effect = fake_state.get_val
+    mock_page.locator.return_value.first.fill.side_effect = fake_state.fill
+    mock_page.locator.return_value.first.press_sequentially.side_effect = fake_state.press
 
     select_airport(mock_page, "input#From", "DEL")
 
