@@ -132,7 +132,7 @@ def ask(payload: AskRequest, db: Session = Depends(get_db), api_key: str = Depen
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.6-flash",
             contents=f"Context:\n{context}\n\nQuestion: {payload.question}",
             config={"system_instruction": SYSTEM_PROMPT, "max_output_tokens": 400},
         )
