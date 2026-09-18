@@ -3,6 +3,7 @@ import TopRoutesCard from "../components/TopRoutesCard";
 import ApixPanel from "../components/ApixPanel";
 import TrendChart from "../components/TrendChart";
 import RouteHeatmap from "../components/RouteHeatmap";
+import AssistantPanel from "../components/AssistantPanel";
 
 export default function Dashboard() {
   const [selectedRoute, setSelectedRoute] = useState(null);
@@ -26,6 +27,8 @@ export default function Dashboard() {
           <ApixPanel />
         </div>
       </div>
+
+      <AssistantPanel selectedRoute={selectedRoute} />
 
       <RouteHeatmap />
     </div>
