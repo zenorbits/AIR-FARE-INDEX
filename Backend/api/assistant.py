@@ -92,16 +92,18 @@ def _retrieve_route_history(db: Session, route: str):
     return context, source
 
 
-def _get_anthropic_client():
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+def _get_gemini_client():
+    # Google's Gemini API has a free tier (no billing required) — get a key
+    # at https://aistudio.google.com/apikey. See Backend/.env.example.
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise HTTPException(
             status_code=503,
-            detail="ANTHROPIC_API_KEY is not set — the assistant endpoint is unavailable until it's configured.",
+            detail="GEMINI_API_KEY is not set — the assistant endpoint is unavailable until it's configured.",
         )
-    import anthropic  # imported lazily: only required when this endpoint is actually called
+    from google import genai  # imported lazily: only required when this endpoint is actually called
 
-    return anthropic.Anthropic(api_key=api_key)
+    return genai.Client(api_key=api_key)
 
 
 SYSTEM_PROMPT = """You are the Airfare Price Index (APIx) assistant for a MoSPI-style \
@@ -125,23 +127,16 @@ def ask(payload: AskRequest, db: Session = Depends(get_db), api_key: str = Depen
             context_parts.append(history_context)
             sources.append(history_source)
 
-    client = _get_anthropic_client()
+    client = _get_gemini_client()
     context = "\n\n".join(context_parts)
 
     try:
-        message = client.messages.create(
-            model="claude-sonnet-5",
-            max_tokens=400,
-            system=SYSTEM_PROMPT,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Context:\n{context}\n\nQuestion: {payload.question}",
-                }
-            ],
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=f"Context:\n{context}\n\nQuestion: {payload.question}",
+            config={"system_instruction": SYSTEM_PROMPT, "max_output_tokens": 400},
         )
-    except Exception as e:  # anthropic SDK errors (rate limit, auth, etc.)
+    except Exception as e:  # Gemini SDK errors (rate limit, auth, etc.)
         raise HTTPException(status_code=502, detail=f"Assistant request failed: {e}") from e
 
-    answer = "".join(block.text for block in message.content if getattr(block, "type", None) == "text")
-    return AskResponse(answer=answer, sources=sources)
+    return AskResponse(answer=response.text, sources=sources)
