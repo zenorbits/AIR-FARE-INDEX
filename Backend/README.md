@@ -57,8 +57,10 @@ The primary current data source is **Yatra**, utilizing network interception of 
 
 ## Current Limitations
 To state honestly, the system currently has a few limitations:
-- **Single Live Data Source**: Relies only on Yatra for now.
-- **Limited Historical Data Window**: The dataset is actively growing via hourly scheduled runs, but historical breadth is currently limited.
+- **Two live sources (Yatra since Sept 5, Cleartrip since Sept 11)** out of 11 OTAs.
+- **Index base day is 2026-09-11**, the first day both sources were live.
+- **Nonstop flights only**: Cleartrip's feed is nonstop-only, so Yatra's connecting flights are excluded for comparability.
+- **Akasa Air is covered through the OTAs** (no direct scrape).
 - **Equal-Weighted Route Index**: The index uses equal weighting across all routes (DGCA traffic-based route weighting is planned but not yet implemented).
 - **No Automated Test Suite**: There is currently no automated testing pipeline setup for the repository.
 

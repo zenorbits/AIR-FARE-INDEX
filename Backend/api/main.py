@@ -9,31 +9,18 @@ from typing import List, Optional, Any, Dict
 from datetime import date, datetime, timedelta
 from fastapi import FastAPI, Depends, Query, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 from sqlalchemy import desc, asc, func
 
 from ml.predict import predict_fare, get_model_metadata, PredictionInputError
 
 # Import existing database setup and models
-from db.database import get_engine
 from index_calc.models import AirfareIndex
 from cleaning.pipeline import FlightPriceClean
 
-API_KEY = os.environ.get("API_KEY")
-if not API_KEY:
-    raise ValueError("API_KEY environment variable is not set")
-
-api_key_header = APIKeyHeader(name="X-API-Key")
-
-def verify_api_key(api_key: str = Depends(api_key_header)):
-    if api_key != API_KEY:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or missing API key"
-        )
-    return api_key
+from api.deps import get_db, verify_api_key
+from api.assistant import router as assistant_router
 
 class PredictPriceRequest(BaseModel):
     route: str = Field(..., min_length=1, description="e.g. DEL-BOM")
@@ -84,15 +71,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-engine = get_engine()
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+app.include_router(assistant_router)
 
 @app.get("/")
 def read_root():

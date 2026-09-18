@@ -26,6 +26,13 @@ dashboard is fully interactive without a backend.
    backend is unreachable it falls back to mock data automatically and logs
    a warning to the console.
 
+**"Ask about this index" (RAG assistant):** this calls `POST /assistant/ask`
+(`Backend/api/assistant.py`), which also needs `GEMINI_API_KEY` set in the
+backend's own `.env` (see `Backend/.env.example` — free tier, no billing
+required, get one at https://aistudio.google.com/apikey) — without it, that
+one endpoint returns a 503 and the frontend falls back to a canned (non-AI)
+mock answer, same as any other unreachable endpoint.
+
 **Note:** the backend requires an `X-API-Key` header on every data endpoint.
 `VITE_API_KEY` ships inside the browser bundle, which is fine for local
 development but not for a public deployment — see the warning at the top of

@@ -13,6 +13,8 @@
 //   - getHeatmapRoutes(): reuses /index/current, normalizes index_value into
 //     a 0-1 intensity, and pairs it with the static city coordinates in
 //     mockData.js (the backend has no city geodata).
+//   - getAssistantAnswer(): calls the RAG-backed POST /assistant/ask
+//     (Backend/api/assistant.py) directly.
 // ---------------------------------------------------------------------------
 import {
   TOP_ROUTES,
@@ -51,18 +53,36 @@ async function apiFetch(path) {
   return res.json();
 }
 
+async function apiPost(path, body) {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(`${path} -> ${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
 // APIx is a Jevons price index computed against this baseline (see
 // Backend/index_calc/jevons.py) — not returned by the API itself.
 const INDEX_BASELINE = 100;
 
 async function fetchCurrentIndexRows() {
-  const rows = await apiFetch("/index/current?frequency=daily&lead_time_days=overall");
+  // The backend does not currently write per-route rows with a NULL (overall) lead time,
+  // so we use the 30-day advance purchase window as a representative view.
+  // This should change to 'overall' once per-route blended rows are written.
+  const rows = await apiFetch("/index/current?frequency=daily&lead_time_days=30");
   return rows.filter((r) => r.route !== "overall");
 }
 
 async function fetchRouteHistory(route) {
+  // The backend does not currently write per-route rows with a NULL (overall) lead time,
+  // so we use the 30-day advance purchase window as a representative view.
+  // This should change to 'overall' once per-route blended rows are written.
   return apiFetch(
-    `/index/history?route=${encodeURIComponent(route)}&lead_time_days=overall&frequency=daily`,
+    `/index/history?route=${encodeURIComponent(route)}&lead_time_days=30&frequency=daily`,
   );
 }
 
@@ -164,4 +184,49 @@ export async function getHeatmapRoutes() {
     console.warn("[api/client] getHeatmapRoutes: backend unreachable, using mock data.", err);
     return { routes: HEATMAP_ROUTES, cities: CITY_COORDS };
   }
+}
+
+// POST /assistant/ask (backend) -> a RAG-grounded natural-language answer.
+// See Backend/api/assistant.py: the answer is generated from the route's
+// real recent index history plus the actual Jevons/DGCA-weighting
+// methodology, never invented. The mock fallback below mimics that same
+// grounded shape (referencing real mock numbers) so the UI behaves
+// identically offline, but it is NOT a language model — just a template.
+export async function getAssistantAnswer({ route, question }) {
+  try {
+    return await apiPost("/assistant/ask", { route, question });
+  } catch (err) {
+    console.warn("[api/client] getAssistantAnswer: backend unreachable, using mock data.", err);
+    return mockAssistantAnswer({ route, question });
+  }
+}
+
+function mockAssistantAnswer({ route, question }) {
+  const detail = route ? APIX_BY_ROUTE[route] : null;
+  const sources = [
+    {
+      label: "Index methodology",
+      detail: "Jevons formula, DGCA route weights, outlier handling (mock — backend unreachable)",
+    },
+  ];
+
+  if (!detail) {
+    return {
+      answer:
+        "The Airfare Price Index (APIX) is a Jevons index: it tracks the geometric mean of fares for each route against a base period, so it reflects genuine price movement rather than just which flights happened to be scraped. Select a route from Top 6 Routes for numbers specific to it. (This is a offline mock answer — the backend isn't reachable right now.)",
+      sources,
+    };
+  }
+
+  const { origin, destination } = routeLabel(route);
+  sources.push({
+    label: `${route} index history`,
+    detail: `current ${detail.current.toFixed(1)}, weekly avg ${detail.weeklyAvg.toFixed(1)} (mock data)`,
+  });
+
+  const direction = detail.current >= detail.weeklyAvg ? "above" : "below";
+  return {
+    answer: `${origin} → ${destination} (${route}) is currently at an APIX of ${detail.current.toFixed(1)}, ${direction} its weekly average of ${detail.weeklyAvg.toFixed(1)} and its monthly average of ${detail.monthlyAvg.toFixed(1)}. Values are indexed to a baseline of ${detail.baseline}, so ${detail.current.toFixed(1)} means fares are roughly ${(detail.current - detail.baseline).toFixed(0)}% above the base period. (This is an offline mock answer for "${question}" — the backend isn't reachable right now, so this isn't a real generated response.)`,
+    sources,
+  };
 }
