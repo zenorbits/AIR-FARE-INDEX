@@ -10,19 +10,19 @@ import { getHeatmapRoutes } from "../api/client";
 const MAP_WIDTH = 480;
 const MAP_HEIGHT = 560;
 
-// Sequential single-hue (grayscale) ramp — magnitude reads as one shade from
+// Sequential single-hue (blue) ramp — magnitude reads as one hue from
 // dim to bright, never a rainbow. Low intensity recedes into the dark
-// surface; high intensity pops bright white — pure monochrome, no color.
+// surface; high intensity pops bright blue.
 const SEQUENTIAL_GRAY = [
-  "#2a2a2a", // recedes into the dark surface (low demand)
-  "#3d3d3d",
-  "#525252",
-  "#686868",
-  "#7f7f7f",
-  "#999999",
-  "#b8b8b8",
-  "#d6d6d6",
-  "#f5f5f5", // pops against the dark surface (high demand)
+  "#0d366b", // recedes into the dark surface (low demand)
+  "#184f95",
+  "#1c5cab",
+  "#256abf",
+  "#2a78d6",
+  "#3987e5",
+  "#5598e7",
+  "#6da7ec",
+  "#86b6ef", // pops against the dark surface (high demand)
 ];
 
 function lerpColor(a, b, t) {
@@ -166,7 +166,7 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
               return (
                 <g key={code}>
                   <title>{c.name}</title>
-                  <circle cx={x} cy={y} r={4} fill="#0a0a0a" stroke="#e5e7eb" strokeWidth={1.5} />
+                  <circle cx={x} cy={y} r={4} fill="#060810" stroke="#93c5fd" strokeWidth={1.5} />
                   <text
                     x={x + dx}
                     y={y + dy}
@@ -174,7 +174,7 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
                     fontSize="11"
                     fontWeight="600"
                     fill="rgba(255,255,255,0.9)"
-                    stroke="#0a0a0a"
+                    stroke="#060810"
                     strokeWidth="2.5"
                     paintOrder="stroke"
                   >
@@ -186,7 +186,7 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
           </ComposableMap>
 
           {hovered && (
-            <div className="absolute top-2 right-2 glass px-3 py-2 rounded-lg text-xs text-white/85 border border-white/15">
+            <div className="absolute top-2 right-2 glass px-3 py-2 rounded-lg text-xs text-white/85 border border-blue-400/30">
               {(() => {
                 const r = routes.find((r) => `${r.from}-${r.to}` === hovered);
                 if (!r) return null;
