@@ -58,12 +58,12 @@ export default function AssistantPanel({ selectedRoute }) {
               ? `Ask about ${selectedRoute}'s price index…`
               : "Ask about the Airfare Price Index…"
           }
-          className="flex-1 bg-white/10 border border-white/15 text-white text-sm rounded-lg px-3 py-2.5 placeholder:text-white/35 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          className="flex-1 bg-white/10 border border-white/15 text-white text-sm rounded-lg px-3 py-2.5 placeholder:text-white/35 focus:outline-none focus:ring-1 focus:ring-white/40"
         />
         <button
           type="submit"
           disabled={loading || !question.trim()}
-          className="px-4 py-2.5 rounded-lg text-sm font-medium bg-indigo-500/80 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors shrink-0"
+          className="px-4 py-2.5 rounded-lg text-sm font-medium bg-white hover:bg-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed text-black transition-colors shrink-0"
         >
           {loading ? "Asking…" : "Ask"}
         </button>
@@ -89,7 +89,7 @@ export default function AssistantPanel({ selectedRoute }) {
       {loading && <div className="h-24 rounded-xl bg-white/5 animate-pulse" />}
 
       {error && !loading && (
-        <div className="glass border border-rose-400/30 bg-rose-400/10 rounded-xl p-4 text-sm text-rose-200">
+        <div className="glass border border-white/30 rounded-xl p-4 text-sm text-white">
           {error}
         </div>
       )}

@@ -51,7 +51,7 @@ export default function BacktestPanel() {
                 <YAxis tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{
-                    background: "rgba(17, 24, 39, 0.9)",
+                    background: "rgba(0, 0, 0, 0.9)",
                     border: "1px solid rgba(255,255,255,0.15)",
                     borderRadius: "0.75rem",
                     color: "#fff",
@@ -59,8 +59,8 @@ export default function BacktestPanel() {
                   labelStyle={{ color: "rgba(255,255,255,0.6)" }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }} />
-                <Line type="monotone" dataKey="cpi_index" name="CPI" stroke="#fbbf24" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="apix_index" name="APIx" stroke="#818cf8" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="cpi_index" name="CPI" stroke="#a3a3a3" strokeDasharray="6 4" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="apix_index" name="APIx" stroke="#ffffff" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
