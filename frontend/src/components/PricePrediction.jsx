@@ -80,7 +80,7 @@ export default function PricePrediction() {
           className="col-span-2 bg-white/10 border border-white/15 text-white text-xs rounded-lg px-2 py-1.5"
         >
           {routes.map((r) => (
-            <option key={r} value={r} className="bg-slate-800">
+            <option key={r} value={r} className="bg-neutral-900">
               {r}
             </option>
           ))}
@@ -109,14 +109,14 @@ export default function PricePrediction() {
         <button
           type="submit"
           disabled={loading || !form.route}
-          className="bg-indigo-500/80 hover:bg-indigo-500 disabled:opacity-40 text-white text-xs font-medium rounded-lg px-3 py-1.5 transition-colors"
+          className="bg-white hover:bg-neutral-200 disabled:opacity-30 text-black text-xs font-medium rounded-lg px-3 py-1.5 transition-colors"
         >
           {loading ? "Predicting…" : "Predict"}
         </button>
       </form>
 
       {error && (
-        <p className="text-rose-300 text-xs mb-3 bg-rose-500/10 border border-rose-400/30 rounded-lg px-3 py-2">
+        <p className="text-white text-xs mb-3 border border-white/30 rounded-lg px-3 py-2">
           {error}
         </p>
       )}
@@ -137,7 +137,7 @@ export default function PricePrediction() {
                 <YAxis tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{
-                    background: "rgba(17, 24, 39, 0.9)",
+                    background: "rgba(0, 0, 0, 0.9)",
                     border: "1px solid rgba(255,255,255,0.15)",
                     borderRadius: "0.75rem",
                     color: "#fff",
@@ -146,13 +146,14 @@ export default function PricePrediction() {
                   formatter={(value) => [`₹${value}`, "Predicted fare"]}
                   labelFormatter={(v) => `${v} days before departure`}
                 />
-                <Line type="monotone" dataKey="predicted_fare" stroke="#4ade80" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="predicted_fare" stroke="#ffffff" strokeWidth={2.5} dot={{ r: 3 }} />
                 <ReferenceDot
                   x={result.cheapest_lead_time_days}
                   y={Math.round(result.cheapest_fare)}
                   r={6}
-                  fill="#fbbf24"
-                  stroke="none"
+                  fill="#000000"
+                  stroke="#ffffff"
+                  strokeWidth={2}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -160,7 +161,7 @@ export default function PricePrediction() {
 
           <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white/80">
             <p className="font-medium text-white">{result.recommendation}</p>
-            {result.extrapolation_note && <p className="text-amber-300/80 text-xs mt-1.5">{result.extrapolation_note}</p>}
+            {result.extrapolation_note && <p className="text-white/60 text-xs mt-1.5 italic">{result.extrapolation_note}</p>}
             {result.confidence_note && <p className="text-white/40 text-xs mt-1.5">{result.confidence_note}</p>}
             {result.model_trained_at && (
               <p className="text-white/30 text-[11px] mt-2">Model trained: {new Date(result.model_trained_at).toLocaleString()}</p>

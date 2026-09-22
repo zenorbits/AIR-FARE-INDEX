@@ -13,7 +13,16 @@ import {
 import { getTrends, getTopRoutes } from "../api/client";
 import { routeLabel } from "../data/mockData";
 
-const LINE_COLORS = ["#818cf8", "#38bdf8", "#f472b6", "#4ade80", "#fbbf24", "#fb7185"];
+// Grayscale only (no color coding) — each line pairs a gray shade with a
+// distinct dash pattern so up to 6 series stay distinguishable without color.
+const LINE_STYLES = [
+  { stroke: "#ffffff", dash: undefined },
+  { stroke: "#a3a3a3", dash: undefined },
+  { stroke: "#ffffff", dash: "6 4" },
+  { stroke: "#737373", dash: undefined },
+  { stroke: "#d4d4d4", dash: "2 3" },
+  { stroke: "#a3a3a3", dash: "6 3 2 3" },
+];
 
 export default function TrendChart({ selectedRoute, onSelectRoute, leadTimeDays = 30 }) {
   const [trend, setTrend] = useState([]);
@@ -31,10 +40,10 @@ export default function TrendChart({ selectedRoute, onSelectRoute, leadTimeDays 
 
   const activeRoute = selectedRoute ?? routes[0]?.route;
 
-  const routeColor = useMemo(() => {
+  const routeStyle = useMemo(() => {
     const map = {};
     routes.forEach((r, i) => {
-      map[r.route] = LINE_COLORS[i % LINE_COLORS.length];
+      map[r.route] = LINE_STYLES[i % LINE_STYLES.length];
     });
     return map;
   }, [routes]);
@@ -70,10 +79,10 @@ export default function TrendChart({ selectedRoute, onSelectRoute, leadTimeDays 
             <select
               value={activeRoute ?? ""}
               onChange={(e) => onSelectRoute?.(e.target.value)}
-              className="bg-white/10 border border-white/15 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+              className="bg-white/10 border border-white/15 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-white/40"
             >
               {routes.map((r) => (
-                <option key={r.route} value={r.route} title={`${r.origin} → ${r.destination}`} className="bg-slate-800">
+                <option key={r.route} value={r.route} title={`${r.origin} → ${r.destination}`} className="bg-neutral-900">
                   {r.route}
                 </option>
               ))}
@@ -90,8 +99,8 @@ export default function TrendChart({ selectedRoute, onSelectRoute, leadTimeDays 
             <ComposedChart data={trend} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
               <defs>
                 <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#818cf8" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#818cf8" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
@@ -99,7 +108,7 @@ export default function TrendChart({ selectedRoute, onSelectRoute, leadTimeDays 
               <YAxis tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} axisLine={false} tickLine={false} domain={["auto", "auto"]} />
               <Tooltip
                 contentStyle={{
-                  background: "rgba(17, 24, 39, 0.9)",
+                  background: "rgba(0, 0, 0, 0.9)",
                   border: "1px solid rgba(255,255,255,0.15)",
                   borderRadius: "0.75rem",
                   color: "#fff",
@@ -124,7 +133,7 @@ export default function TrendChart({ selectedRoute, onSelectRoute, leadTimeDays 
                               title={`${origin} → ${destination}`}
                             >
                               <span
-                                className="inline-block h-2 w-2 rounded-full"
+                                className="inline-block h-2 w-2 rounded-full border border-white/40"
                                 style={{ background: entry.color }}
                               />
                               <span style={{ color: "rgba(255,255,255,0.6)" }}>{entry.value}</span>
@@ -139,7 +148,8 @@ export default function TrendChart({ selectedRoute, onSelectRoute, leadTimeDays 
                       key={r.route}
                       type="monotone"
                       dataKey={r.route}
-                      stroke={routeColor[r.route]}
+                      stroke={routeStyle[r.route]?.stroke}
+                      strokeDasharray={routeStyle[r.route]?.dash}
                       strokeWidth={2}
                       dot={false}
                       activeDot={{ r: 4 }}
@@ -150,7 +160,7 @@ export default function TrendChart({ selectedRoute, onSelectRoute, leadTimeDays 
                 <Area
                   type="monotone"
                   dataKey={activeRoute}
-                  stroke="#818cf8"
+                  stroke="#ffffff"
                   strokeWidth={2.5}
                   fill="url(#areaFill)"
                   dot={false}

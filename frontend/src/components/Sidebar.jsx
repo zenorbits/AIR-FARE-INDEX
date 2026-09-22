@@ -4,7 +4,7 @@ export default function Sidebar({ active = "dashboard" }) {
   return (
     <aside className="glass w-full md:w-60 md:min-h-screen md:sticky md:top-0 flex md:flex-col shrink-0 p-4 md:p-6 gap-4 md:gap-8 rounded-none md:rounded-r-2xl border-t-0 md:border-t border-l-0">
       <div className="flex items-center gap-2 md:mb-4">
-        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 flex items-center justify-center text-lg shadow-lg shadow-indigo-900/40">
+        <div className="h-9 w-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-lg">
           ✈️
         </div>
         <div>
