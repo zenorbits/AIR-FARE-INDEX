@@ -6,7 +6,7 @@ function TrendBadge({ change }) {
   return (
     <span
       className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${
-        isUp ? "border-white/30 text-white" : "border-white/15 text-white/50"
+        isUp ? "border-blue-400/40 text-blue-300" : "border-white/15 text-white/50"
       }`}
     >
       {isUp ? "▲" : "▼"} {Math.abs(change).toFixed(1)}%
@@ -49,7 +49,7 @@ export default function TopRoutesCard({ selectedRoute, onSelectRoute, leadTimeDa
                 onClick={() => onSelectRoute?.(r.route)}
                 className={`glass glass-hover text-left p-4 rounded-xl border transition-colors ${
                   isSelected
-                    ? "border-white/60 bg-white/10"
+                    ? "border-blue-400/60 bg-blue-500/10"
                     : "border-white/10"
                 }`}
               >

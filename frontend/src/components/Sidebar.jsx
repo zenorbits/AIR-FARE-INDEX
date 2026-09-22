@@ -4,7 +4,7 @@ export default function Sidebar({ active = "dashboard" }) {
   return (
     <aside className="glass w-full md:w-60 md:min-h-screen md:sticky md:top-0 flex md:flex-col shrink-0 p-4 md:p-6 gap-4 md:gap-8 rounded-none md:rounded-r-2xl border-t-0 md:border-t border-l-0">
       <div className="flex items-center gap-2 md:mb-4">
-        <div className="h-9 w-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-lg">
+        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-900 border border-blue-400/30 flex items-center justify-center text-lg shadow-lg shadow-blue-900/50">
           ✈️
         </div>
         <div>
@@ -20,7 +20,7 @@ export default function Sidebar({ active = "dashboard" }) {
             type="button"
             className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left ${
               active === item.key
-                ? "bg-white/15 text-white shadow-inner border border-white/20"
+                ? "bg-blue-500/15 text-white shadow-inner border border-blue-400/30"
                 : "text-white/60 hover:bg-white/8 hover:text-white/90"
             }`}
           >

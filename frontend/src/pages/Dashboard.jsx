@@ -37,7 +37,7 @@ export default function Dashboard() {
           <select
             value={leadTimeDays}
             onChange={(e) => setLeadTimeDays(Number(e.target.value))}
-            className="bg-white/10 border border-white/15 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-white/40"
+            className="bg-white/10 border border-white/15 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400/60"
           >
             {AVAILABLE_LEAD_TIMES.map((lt) => (
               <option key={lt} value={lt} className="bg-neutral-900">

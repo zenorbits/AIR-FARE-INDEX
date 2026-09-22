@@ -109,14 +109,14 @@ export default function PricePrediction() {
         <button
           type="submit"
           disabled={loading || !form.route}
-          className="bg-white hover:bg-neutral-200 disabled:opacity-30 text-black text-xs font-medium rounded-lg px-3 py-1.5 transition-colors"
+          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-30 text-white text-xs font-medium rounded-lg px-3 py-1.5 transition-colors"
         >
           {loading ? "Predicting…" : "Predict"}
         </button>
       </form>
 
       {error && (
-        <p className="text-white text-xs mb-3 border border-white/30 rounded-lg px-3 py-2">
+        <p className="text-white text-xs mb-3 border border-blue-400/30 rounded-lg px-3 py-2">
           {error}
         </p>
       )}
@@ -137,8 +137,8 @@ export default function PricePrediction() {
                 <YAxis tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{
-                    background: "rgba(0, 0, 0, 0.9)",
-                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: "rgba(6, 8, 16, 0.95)",
+                    border: "1px solid rgba(59, 130, 246, 0.3)",
                     borderRadius: "0.75rem",
                     color: "#fff",
                   }}
@@ -146,13 +146,13 @@ export default function PricePrediction() {
                   formatter={(value) => [`₹${value}`, "Predicted fare"]}
                   labelFormatter={(v) => `${v} days before departure`}
                 />
-                <Line type="monotone" dataKey="predicted_fare" stroke="#ffffff" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="predicted_fare" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3 }} />
                 <ReferenceDot
                   x={result.cheapest_lead_time_days}
                   y={Math.round(result.cheapest_fare)}
                   r={6}
-                  fill="#000000"
-                  stroke="#ffffff"
+                  fill="#060810"
+                  stroke="#3b82f6"
                   strokeWidth={2}
                 />
               </LineChart>
