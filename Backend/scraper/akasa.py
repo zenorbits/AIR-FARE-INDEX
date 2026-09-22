@@ -13,6 +13,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from patchright.sync_api import sync_playwright
+from patchright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 
@@ -30,6 +31,15 @@ POPUP_CLOSE_SELECTORS = [
     "button:has-text('Accept')",
 ]
 
+CITY_MAP = {
+    "DEL": ["DELHI"],
+    "BOM": ["MUMBAI"],
+    "BLR": ["BENGALURU", "BANGALORE"],
+    "CCU": ["KOLKATA"],
+    "HYD": ["HYDERABAD"],
+    "MAA": ["CHENNAI"]
+}
+
 
 def _ordinal_suffix(day: int) -> str:
     """1 -> 'st', 2 -> 'nd', 3 -> 'rd', 4..20 -> 'th', 21 -> 'st', etc."""
@@ -39,66 +49,60 @@ def _ordinal_suffix(day: int) -> str:
 
 
 def select_airport(page, field_selector: str, iata: str) -> None:
-    """Fill an origin/destination autocomplete field and select the matching airport.
+    """Select an origin/destination by clicking the field and choosing the
+    matching option from the destinations list that's already rendered --
+    no typing.
 
-    The option locator is scoped to "#destinations li" rather than a bare
-    "li:has-text(...)": the site's top nav (e.g. the Add-Ons menu's "Delayed
-    or Lost Baggage" link) sits earlier in the DOM and substring-matches a
-    3-letter code too, so an unscoped locator clicks that nav item instead
-    of the real suggestion -- which is what was navigating the scraper away
-    to the Add-Ons page mid-search. Retries once if the selection can't be
-    confirmed afterwards.
+    Typing into these fields reliably breaks Akasa's dropdown: live network
+    inspection showed no request backs the list (it's fetched once at page
+    load from Storyblok's app-master-data and rendered fully client-side --
+    all airports, including every IATA code this scraper needs, are already
+    present as real li[id="{iata}"] elements as soon as the field is
+    clicked), and typing empties #destinations client-side with no reliable
+    recovery signal to wait on. So this selects directly from the full list
+    instead of typing to filter it.
+
+    The option locator is scoped to "#destinations:visible li[id=...]"
+    rather than a bare "li:has-text(...)" or "#destinations li": the site's
+    top nav (e.g. the Add-Ons menu's "Delayed or Lost Baggage" link)
+    substring-matches a 3-letter code too, and both the From and To fields'
+    dropdowns share the same "#destinations" id, so only the currently
+    visible one should be searched.
+
+    Raises RuntimeError if the field already has leftover text, the option
+    never appears, or the post-click readback doesn't match. Callers are
+    expected to recover via a page reload (typing isn't a valid recovery
+    path here), not by retrying in place.
     """
     field = page.locator(field_selector).first
-    option = page.locator(f'#destinations li[id="{iata}"]')
+    option = page.locator(f'#destinations:visible li[id="{iata}"]').first
+    valid_cities = CITY_MAP.get(iata, [])
 
-    city_map = {
-        "DEL": ["DELHI"],
-        "BOM": ["MUMBAI"],
-        "BLR": ["BENGALURU", "BANGALORE"],
-        "CCU": ["KOLKATA"],
-        "HYD": ["HYDERABAD"],
-        "MAA": ["CHENNAI"]
-    }
-    valid_cities = city_map.get(iata, [])
+    existing = field.input_value()
+    if existing.strip() != "":
+        raise RuntimeError(f"Field {field_selector!r} already has leftover text {existing!r} before selecting {iata!r}")
 
-    last_error = "unknown error"
-    for _attempt in range(2):
-        try:
-            field.click(timeout=10000)
-            page.keyboard.press("Control+A")
-            page.keyboard.press("Delete")
-            if field.input_value() != "":
-                field.fill("")
-                
-            if field.input_value() != "":
-                raise RuntimeError("Field is not empty after clearing")
+    field.click(timeout=10000)
+    option.wait_for(state="visible", timeout=10000)
+    option.scroll_into_view_if_needed(timeout=5000)
+    option.click(timeout=5000)
+    page.wait_for_timeout(300)
 
-            field.press_sequentially(iata, delay=150)
-            
-            try:
-                option.first.wait_for(state="visible", timeout=10000)
-            except Exception as e:
-                import os
-                os.makedirs("scratch", exist_ok=True)
-                page.screenshot(path=f"scratch/akasa_{iata}_fail.png")
-                container = page.locator("#destinations").first
-                if container.is_visible():
-                    html = container.inner_html()
-                    logger.warning(f"Dropdown HTML: {html[:500]}")
-                raise e
+    value = field.input_value().upper()
+    if iata in value or any(city in value for city in valid_cities):
+        return
 
-            option.first.click(timeout=5000)
-            page.wait_for_timeout(300)
+    raise RuntimeError(f"Could not select airport {iata!r} in {field_selector!r}: readback was {value!r}")
 
-            value = field.input_value().upper()
-            if iata in value or any(city in value for city in valid_cities):
-                return
-            last_error = f"field value after selection was {value!r}, expected to contain {iata!r} or city name"
-        except Exception as e:
-            last_error = str(e)
 
-    raise RuntimeError(f"Could not select airport {iata!r} in {field_selector!r}: {last_error}")
+def _field_value_matches(page, field_selector: str, iata: str) -> bool:
+    """True if the field's current value still reflects the selected airport."""
+    try:
+        value = page.locator(field_selector).first.input_value().upper()
+    except Exception:
+        return False
+    valid_cities = CITY_MAP.get(iata, [])
+    return iata in value or any(city in value for city in valid_cities)
 
 
 def _payload_matches(payload: Any, expected_date: str) -> bool:
@@ -135,8 +139,9 @@ class AkasaScraper(BaseScraper):
         captured: Optional[dict] = None
         page = None
         context_ref = None
+        route = f"{origin}-{destination}"
 
-        logger.info(f"[{self.source}] Scraping route {origin}-{destination} for {travel_date}")
+        logger.info(f"[{self.source}] Scraping route {route} for {travel_date}")
 
         watchdog_triggered = False
         def watchdog():
@@ -198,25 +203,33 @@ class AkasaScraper(BaseScraper):
                     page.wait_for_timeout(8000)
                     self._dismiss_popups(page)
                     
-                    response = self._fill_search(page, origin, destination, date_obj)
+                    response = None
+                    no_response_reason = None
+                    try:
+                        response = self._fill_search(page, origin, destination, date_obj)
+                    except PlaywrightTimeoutError:
+                        no_response_reason = "watchdog" if watchdog_triggered else "timeout"
 
-                    if response:
+                    if response is not None:
                         if response.status != 200:
-                            logger.warning(f"[{self.source}] availability/search returned {response.status}")
+                            no_response_reason = f"status_{response.status}"
                         else:
                             payload = response.json()
                             if _payload_matches(payload, expected_date):
                                 captured = payload
                             else:
-                                logger.debug(f"[{self.source}] Ignoring search response for a different date")
+                                no_response_reason = "date_mismatch"
+                    elif no_response_reason is None:
+                        no_response_reason = "timeout"
 
                     if captured is None:
                         self._save_screenshot(page, origin, destination, travel_date)
-                        logger.warning(f"[{self.source}] No availability response for {origin}-{destination} on {travel_date}")
+                        logger.warning(f"[{self.source}] NO_RESPONSE {route} {travel_date} reason={no_response_reason}")
                         return []
 
                 except Exception as e:
                     if watchdog_triggered:
+                        logger.warning(f"[{self.source}] NO_RESPONSE {route} {travel_date} reason=watchdog")
                         return []
                     logger.error(f"[{self.source}] Error during search/interception: {e}")
                     if page is not None:
@@ -237,7 +250,10 @@ class AkasaScraper(BaseScraper):
         self._dump_payload(captured, origin, destination, travel_date)
 
         results = parse_akasa_response(captured, origin, destination, lead_time_days, now)
-        logger.info(f"[{self.source}] Extracted {len(results)} flights for {origin}-{destination}")
+        if results:
+            logger.info(f"[{self.source}] OK {route} {travel_date} rows={len(results)}")
+        else:
+            logger.info(f"[{self.source}] NO_FLIGHTS {route} {travel_date}")
         return results
 
     # ------------------------------------------------------------------
@@ -258,16 +274,63 @@ class AkasaScraper(BaseScraper):
             pass
 
     def _fill_search(self, page, origin: str, destination: str, date_obj: datetime) -> Any:
-        try:
-            page.locator("input#oneway").first.click(timeout=3000, force=True)
-            page.wait_for_timeout(500)
-        except Exception:
-            pass
+        route = f"{origin}-{destination}"
+        date_label = date_obj.strftime("%d/%m/%Y")
+        max_reloads = 2
+        reload_count = 0
 
-        select_airport(page, "input#From", origin)
-        page.wait_for_timeout(1000)
-        select_airport(page, "input#To", destination)
-        page.wait_for_timeout(1000)
+        while True:
+            try:
+                page.locator("input#oneway").first.click(timeout=3000, force=True)
+                page.wait_for_timeout(500)
+            except Exception:
+                pass
+
+            bad_field = None
+            try:
+                select_airport(page, "input#To", destination)
+                page.wait_for_timeout(1000)
+            except Exception:
+                bad_field = "To"
+
+            if bad_field is None:
+                try:
+                    select_airport(page, "input#From", origin)
+                    page.wait_for_timeout(1000)
+                except Exception:
+                    bad_field = "From"
+
+            if bad_field is None:
+                to_ok = _field_value_matches(page, "input#To", destination)
+                from_ok = _field_value_matches(page, "input#From", origin)
+                if not to_ok:
+                    bad_field = "To"
+                elif not from_ok:
+                    bad_field = "From"
+
+            if bad_field is None:
+                break  # both fields filled and verified
+
+            if reload_count >= max_reloads:
+                from_val = self._safe_field_value(page, "input#From")
+                to_val = self._safe_field_value(page, "input#To")
+                logger.error(f"[{self.source}] FILL_FAILED {route} {date_label}: From='{from_val}' To='{to_val}'")
+                self._save_screenshot(page, origin, destination, date_label)
+                raise RuntimeError(f"FILL_FAILED {route} {date_label}: From='{from_val}' To='{to_val}'")
+
+            reload_count += 1
+            logger.warning(f"[{self.source}] FILL_RETRY_RELOAD {route} {date_label} field={bad_field}")
+            try:
+                with page.expect_response(
+                    lambda r: "app-master-data" in r.url and r.status == 200,
+                    timeout=20000,
+                ):
+                    page.reload(wait_until="domcontentloaded")
+            except PlaywrightTimeoutError:
+                logger.debug(f"[{self.source}] app-master-data response not observed within 20s after reload")
+            self._dismiss_popups(page)
+            self._wait_fields_ready(page)
+            # loop back and refill both fields from scratch
 
         # Date
         page.locator("input[name='DepartureDate']").first.click(timeout=10000)
@@ -305,6 +368,26 @@ class AkasaScraper(BaseScraper):
             page.locator("button:has-text('Search Flights')").first.click(timeout=10000)
             
         return response_info.value
+
+    def _safe_field_value(self, page, selector: str) -> str:
+        try:
+            return page.locator(selector).first.input_value()
+        except Exception:
+            return "?"
+
+    def _wait_fields_ready(self, page, timeout_ms: int = 15000) -> None:
+        """Wait for input#To and input#From to be visible and interactable after a reload."""
+        to_field = page.locator("input#To").first
+        from_field = page.locator("input#From").first
+        to_field.wait_for(state="visible", timeout=timeout_ms)
+        from_field.wait_for(state="visible", timeout=timeout_ms)
+        for _ in range(20):
+            try:
+                if to_field.is_enabled() and from_field.is_enabled():
+                    return
+            except Exception:
+                pass
+            page.wait_for_timeout(250)
 
     def _save_screenshot(self, page, origin: str, destination: str, travel_date: str) -> None:
         try:
