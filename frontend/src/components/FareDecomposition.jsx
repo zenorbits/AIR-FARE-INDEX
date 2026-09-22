@@ -75,7 +75,7 @@ export default function FareDecomposition() {
         <select
           value={route}
           onChange={(e) => setRoute(e.target.value)}
-          className="bg-white/10 border border-white/15 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-white/40"
+          className="bg-white/10 border border-white/15 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400/60"
         >
           {routes.map((r) => (
             <option key={r} value={r} className="bg-neutral-900">
@@ -98,16 +98,16 @@ export default function FareDecomposition() {
               <YAxis tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  background: "rgba(0, 0, 0, 0.9)",
-                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: "rgba(6, 8, 16, 0.95)",
+                  border: "1px solid rgba(59, 130, 246, 0.3)",
                   borderRadius: "0.75rem",
                   color: "#fff",
                 }}
                 labelStyle={{ color: "rgba(255,255,255,0.6)" }}
               />
               <Legend wrapperStyle={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }} />
-              <Bar dataKey="Base fare" stackId="fare" fill="#e5e5e5" radius={[0, 0, 4, 4]} />
-              <Bar dataKey="Taxes & fees" stackId="fare" fill="#737373" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Base fare" stackId="fare" fill="#93c5fd" radius={[0, 0, 4, 4]} />
+              <Bar dataKey="Taxes & fees" stackId="fare" fill="#1d4ed8" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

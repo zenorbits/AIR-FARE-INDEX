@@ -47,7 +47,7 @@ export default function ApixPanel({ leadTimeDays = 30 }) {
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold text-white">{detail?.current.toFixed(1)}</p>
-                  <p className={`text-xs font-medium ${overBaseline >= 0 ? "text-white" : "text-white/50"}`}>
+                  <p className={`text-xs font-medium ${overBaseline >= 0 ? "text-blue-300" : "text-white/50"}`}>
                     {overBaseline >= 0 ? "+" : ""}
                     {overBaseline.toFixed(1)} vs baseline
                   </p>
