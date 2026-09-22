@@ -1,6 +1,7 @@
 venv/
 .env
 debug_dumps/
+*_browser_profile*/
 *.log
 *.log[0-9]
 __pycache__/
