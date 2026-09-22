@@ -107,7 +107,7 @@ def calculate_index():
             FlightPriceClean.total_fare
         ).filter(
             # Akasa flights already arrive via Yatra/Cleartrip; the direct feed is stored for fare decomposition and ML, but excluded here to avoid double-counting.
-            FlightPriceClean.source != 'akasa',
+            FlightPriceClean.source.notin_(['akasa', 'indigo', 'makemytrip']),
             FlightPriceClean.is_outlier == False,
             FlightPriceClean.scraped_hour >= BASE_PERIOD_START,
             FlightPriceClean.scraped_hour < BASE_PERIOD_END + timedelta(days=1)
@@ -135,7 +135,7 @@ def calculate_index():
             FlightPriceClean.total_fare
         ).filter(
             # Akasa flights already arrive via Yatra/Cleartrip; the direct feed is stored for fare decomposition and ML, but excluded here to avoid double-counting.
-            FlightPriceClean.source != 'akasa',
+            FlightPriceClean.source.notin_(['akasa', 'indigo', 'makemytrip']),
             FlightPriceClean.is_outlier == False,
             FlightPriceClean.scraped_hour >= BASE_PERIOD_START
         ).all()

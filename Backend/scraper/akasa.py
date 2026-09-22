@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import re
+import threading
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -49,11 +50,7 @@ def select_airport(page, field_selector: str, iata: str) -> None:
     confirmed afterwards.
     """
     field = page.locator(field_selector).first
-    # The code and city name run together with no separator in the option's
-    # text ("DELDelhiIndira Gandhi International Airport"), so a \b-bounded
-    # regex never matches -- anchor on the start instead, where the code
-    # always appears.
-    option = page.locator("#destinations li").filter(has_text=re.compile(rf"^{re.escape(iata)}"))
+    option = page.locator(f'#destinations li[id="{iata}"]')
 
     city_map = {
         "DEL": ["DELHI"],
@@ -118,7 +115,7 @@ def _payload_matches(payload: Any, expected_date: str) -> bool:
 
 class AkasaScraper(BaseScraper):
     """Scraper for Akasa Air using the page's own availability response."""
-    SUPPORTED_ROUTES = {("BOM", "BLR"), ("DEL", "BLR"), ("DEL", "BOM"), ("DEL", "CCU"), ("BLR", "HYD")}
+    SUPPORTED_ROUTES = {("BOM", "BLR"), ("DEL", "BLR"), ("DEL", "BOM"), ("DEL", "CCU")}
 
     def __init__(self):
         self.source = "akasa"
@@ -137,74 +134,105 @@ class AkasaScraper(BaseScraper):
         expected_date = date_obj.strftime("%Y-%m-%d")
         captured: Optional[dict] = None
         page = None
+        context_ref = None
 
         logger.info(f"[{self.source}] Scraping route {origin}-{destination} for {travel_date}")
 
-        with sync_playwright() as p:
-            context = p.chromium.launch_persistent_context(
-                user_data_dir="./akasa_browser_profile",
-                headless=False,
-                args=["--disable-blink-features=AutomationControlled"],
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                viewport={"width": 1280, "height": 720},
-                locale="en-IN",
-                timezone_id="Asia/Kolkata",
-                geolocation={"longitude": 77.2090, "latitude": 28.6139}
-            )
-
+        watchdog_triggered = False
+        def watchdog():
+            nonlocal watchdog_triggered
+            watchdog_triggered = True
+            logger.error(f"[{self.source}] Search exceeded 3 min, aborted")
+            
             try:
-                page = context.pages[0] if context.pages else context.new_page()
+                import psutil
+                akasa_procs = []
+                for proc in psutil.process_iter(["pid", "cmdline"]):
+                    cmd = " ".join(proc.info.get("cmdline") or []).lower()
+                    if "akasa_browser_profile" in cmd:
+                        akasa_procs.append(proc)
                 
-                context.add_init_script(
-                    "try { window.localStorage.clear(); window.sessionStorage.clear(); } catch(e) {}"
-                )
-
-                def handle_response(response):
-                    nonlocal captured
+                victims = []
+                for p in akasa_procs:
+                    victims.append(p)
                     try:
-                        if "availability/search" not in response.url:
-                            return
-                        if response.request.method != "POST":
-                            return
+                        victims.extend(p.children(recursive=True))
+                    except psutil.NoSuchProcess:
+                        pass
+                
+                unique = list({v.pid: v for v in victims}.values())
+                for v in unique:
+                    try:
+                        v.kill()
+                    except psutil.NoSuchProcess:
+                        pass
+            except Exception as e:
+                logger.warning(f"[{self.source}] Watchdog kill failed: {e}")
+
+        # Timer for 3 mins (180 seconds)
+        watchdog_timer = threading.Timer(180.0, watchdog)
+        watchdog_timer.start()
+
+        try:
+            with sync_playwright() as p:
+                context = p.chromium.launch_persistent_context(
+                    user_data_dir="./akasa_browser_profile",
+                    headless=False,
+                    args=["--disable-blink-features=AutomationControlled"],
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                    viewport={"width": 1280, "height": 720},
+                    locale="en-IN",
+                    timezone_id="Asia/Kolkata",
+                    geolocation={"longitude": 77.2090, "latitude": 28.6139}
+                )
+                context_ref = context
+
+                try:
+                    page = context.pages[0] if context.pages else context.new_page()
+                    
+                    context.add_init_script(
+                        "try { window.localStorage.clear(); window.sessionStorage.clear(); } catch(e) {}"
+                    )
+
+                    page.goto(HOME_URL, wait_until="domcontentloaded", timeout=60000)
+                    page.wait_for_timeout(8000)
+                    self._dismiss_popups(page)
+                    
+                    response = self._fill_search(page, origin, destination, date_obj)
+
+                    if response:
                         if response.status != 200:
                             logger.warning(f"[{self.source}] availability/search returned {response.status}")
-                            return
-                        payload = response.json()
-                        if _payload_matches(payload, expected_date):
-                            captured = payload
                         else:
-                            logger.debug(f"[{self.source}] Ignoring search response for a different date")
-                    except Exception as e:
-                        logger.error(f"[{self.source}] Error reading availability JSON: {e}")
+                            payload = response.json()
+                            if _payload_matches(payload, expected_date):
+                                captured = payload
+                            else:
+                                logger.debug(f"[{self.source}] Ignoring search response for a different date")
 
-                page.on("response", handle_response)
+                    if captured is None:
+                        self._save_screenshot(page, origin, destination, travel_date)
+                        logger.warning(f"[{self.source}] No availability response for {origin}-{destination} on {travel_date}")
+                        return []
 
-                page.goto(HOME_URL, wait_until="domcontentloaded", timeout=60000)
-                page.wait_for_timeout(8000)
-                self._dismiss_popups(page)
-                self._fill_search(page, origin, destination, date_obj)
-
-                for _ in range(30):
-                    if captured is not None:
-                        break
-                    page.wait_for_timeout(1000)
-
-                if captured is None:
-                    self._save_screenshot(page, origin, destination, travel_date)
-                    logger.warning(f"[{self.source}] No availability response for {origin}-{destination} on {travel_date}")
-                    return []
-
-            except Exception as e:
-                logger.error(f"[{self.source}] Error during search/interception: {e}")
-                if page is not None:
-                    self._save_screenshot(page, origin, destination, travel_date)
-                raise  # trigger Tenacity retry
-            finally:
-                context.close()
-                try:
-                    cleanup_orphaned_browsers()
                 except Exception as e:
-                    logger.warning(f"[{self.source}] Orphaned browser cleanup failed: {e}")
+                    if watchdog_triggered:
+                        return []
+                    logger.error(f"[{self.source}] Error during search/interception: {e}")
+                    if page is not None:
+                        self._save_screenshot(page, origin, destination, travel_date)
+                    raise  # trigger Tenacity retry
+                finally:
+                    try:
+                        context.close()
+                    except Exception:
+                        pass
+                    try:
+                        cleanup_orphaned_browsers()
+                    except Exception as e:
+                        logger.warning(f"[{self.source}] Orphaned browser cleanup failed: {e}")
+        finally:
+            watchdog_timer.cancel()
 
         self._dump_payload(captured, origin, destination, travel_date)
 
@@ -229,7 +257,7 @@ class AkasaScraper(BaseScraper):
         except Exception:
             pass
 
-    def _fill_search(self, page, origin: str, destination: str, date_obj: datetime) -> None:
+    def _fill_search(self, page, origin: str, destination: str, date_obj: datetime) -> Any:
         try:
             page.locator("input#oneway").first.click(timeout=3000, force=True)
             page.wait_for_timeout(500)
@@ -264,7 +292,19 @@ class AkasaScraper(BaseScraper):
             page.keyboard.press("Enter")
         page.wait_for_timeout(500)
 
-        page.locator("button:has-text('Search Flights')").first.click(timeout=10000)
+        expected_date = date_obj.strftime("%Y-%m-%d")
+        
+        def response_predicate(response):
+            if "availability/search" in response.url and response.request.method == "POST":
+                post_data = response.request.post_data
+                if post_data and expected_date in post_data:
+                    return True
+            return False
+
+        with page.expect_response(response_predicate, timeout=30000) as response_info:
+            page.locator("button:has-text('Search Flights')").first.click(timeout=10000)
+            
+        return response_info.value
 
     def _save_screenshot(self, page, origin: str, destination: str, travel_date: str) -> None:
         try:
