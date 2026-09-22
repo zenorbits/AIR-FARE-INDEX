@@ -5,12 +5,14 @@ import random
 import traceback
 import yaml
 import logging
+import logging.handlers
 from pathlib import Path
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 from scraper.yatra import YatraScraper
 from scraper.cleartrip import ClearTripScraper, CleartripBlocked
+from scraper.akasa import AkasaScraper
 from db.database import get_engine, init_db, insert_flights
 from cleaning.pipeline import run_pipeline
 from index_calc.jevons import calculate_index
@@ -20,7 +22,12 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(Path(__file__).resolve().parent / "scraper.log", encoding="utf-8"),
+        logging.handlers.RotatingFileHandler(
+            Path(__file__).resolve().parent / "scraper.log",
+            encoding="utf-8",
+            maxBytes=5 * 1024 * 1024,
+            backupCount=3,
+        ),
         logging.StreamHandler()
     ],
     force=True
@@ -41,6 +48,7 @@ DEFAULT_CLEARTRIP_SEARCHES_PER_RUN = 10   # override with `cleartrip_searches_pe
 CLEARTRIP_DELAY_SECONDS = (60, 120)        # random pause between Cleartrip searches
 CLEARTRIP_MAX_CONSECUTIVE_FAILURES = 2     # stop Cleartrip for this run after this many failures in a row
 YATRA_DELAY_SECONDS = (30, 90)             # unchanged from before
+AKASA_DELAY_SECONDS = (30, 90)             # same profile as Yatra; AkasaScraper.SUPPORTED_ROUTES limits it to 5 routes
 
 
 def load_config(config_path="config.yaml"):
@@ -52,6 +60,13 @@ def get_travel_date(lead_time_days: int) -> str:
     """Returns travel date in DD/MM/YYYY format based on lead time."""
     target_date = datetime.now() + timedelta(days=lead_time_days)
     return target_date.strftime("%d/%m/%Y")
+
+
+def is_route_supported(scraper, origin: str, destination: str) -> bool:
+    supported = getattr(scraper, "SUPPORTED_ROUTES", None)
+    if supported is not None and (origin, destination) not in supported:
+        return False
+    return True
 
 
 def build_jobs(routes, lead_times):
@@ -91,6 +106,11 @@ def run_scraper(scraper, jobs, engine, delay_range, max_consecutive_failures=Non
     for idx, (origin, destination, lead_time) in enumerate(jobs):
         travel_date = get_travel_date(lead_time)
         remaining = len(jobs) - idx - 1
+
+        if not is_route_supported(scraper, origin, destination):
+            logger.info(f"[{name}] Skipping {origin}-{destination} (not served)")
+            continue
+
         logger.info(f"[{name}] ({idx + 1}/{len(jobs)}) Scraping {origin}-{destination} for {travel_date} (lead: {lead_time} days)")
 
         import concurrent.futures
@@ -173,6 +193,7 @@ def main():
     plan = [
         (YatraScraper(), all_jobs, YATRA_DELAY_SECONDS, None),
         (ClearTripScraper(), ct_jobs, CLEARTRIP_DELAY_SECONDS, CLEARTRIP_MAX_CONSECUTIVE_FAILURES),
+        (AkasaScraper(), all_jobs, AKASA_DELAY_SECONDS, None),
     ]
 
     total_inserted = 0

@@ -10,21 +10,19 @@ import { getHeatmapRoutes } from "../api/client";
 const MAP_WIDTH = 480;
 const MAP_HEIGHT = 560;
 
-// Sequential single-hue (blue) ramp — magnitude should read as one hue from
-// dim to bright, never a rainbow. Values are the validated palette's
-// sequential blue steps (see the dataviz skill's reference palette).
-// Because the dashboard is dark-themed, low intensity recedes toward the
-// dark surface (darkest step) and high intensity pops brighter (lightest step).
-const SEQUENTIAL_BLUE = [
-  "#0d366b", // step 700 — recedes into the dark surface (low demand)
-  "#184f95", // step 600
-  "#1c5cab", // step 550
-  "#256abf", // step 500
-  "#2a78d6", // step 450
-  "#3987e5", // step 400
-  "#5598e7", // step 350
-  "#6da7ec", // step 300
-  "#86b6ef", // step 250 — pops against the dark surface (high demand)
+// Sequential single-hue (grayscale) ramp — magnitude reads as one shade from
+// dim to bright, never a rainbow. Low intensity recedes into the dark
+// surface; high intensity pops bright white — pure monochrome, no color.
+const SEQUENTIAL_GRAY = [
+  "#2a2a2a", // recedes into the dark surface (low demand)
+  "#3d3d3d",
+  "#525252",
+  "#686868",
+  "#7f7f7f",
+  "#999999",
+  "#b8b8b8",
+  "#d6d6d6",
+  "#f5f5f5", // pops against the dark surface (high demand)
 ];
 
 function lerpColor(a, b, t) {
@@ -44,10 +42,10 @@ function lerpColor(a, b, t) {
 
 function intensityColor(intensity) {
   const clamped = Math.min(1, Math.max(0, intensity));
-  const steps = SEQUENTIAL_BLUE.length - 1;
+  const steps = SEQUENTIAL_GRAY.length - 1;
   const pos = clamped * steps;
   const i = Math.min(steps - 1, Math.floor(pos));
-  return lerpColor(SEQUENTIAL_BLUE[i], SEQUENTIAL_BLUE[i + 1], pos - i);
+  return lerpColor(SEQUENTIAL_GRAY[i], SEQUENTIAL_GRAY[i + 1], pos - i);
 }
 
 const LABEL_OFFSET = {
@@ -57,20 +55,19 @@ const LABEL_OFFSET = {
   right: { dx: 9, dy: 3, anchor: "start" },
 };
 
-export default function RouteHeatmap() {
+export default function RouteHeatmap({ leadTimeDays = 30 }) {
   const [routes, setRoutes] = useState([]);
   const [cities, setCities] = useState({});
   const [hovered, setHovered] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Swap for: fetch(`${API_BASE_URL}/api/heatmap`)
-    getHeatmapRoutes().then(({ routes, cities }) => {
+    getHeatmapRoutes(leadTimeDays).then(({ routes, cities }) => {
       setRoutes(routes);
       setCities(cities);
       setLoading(false);
     });
-  }, []);
+  }, [leadTimeDays]);
 
   const projection = useMemo(
     () => geoMercator().center([82.8, 22.5]).scale(880).translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]),
@@ -92,7 +89,7 @@ export default function RouteHeatmap() {
         <div className="flex items-center gap-2 text-xs text-white/45">
           <span
             className="inline-block h-2 w-16 rounded-full"
-            style={{ background: `linear-gradient(90deg, ${SEQUENTIAL_BLUE[0]}, ${SEQUENTIAL_BLUE[SEQUENTIAL_BLUE.length - 1]})` }}
+            style={{ background: `linear-gradient(90deg, ${SEQUENTIAL_GRAY[0]}, ${SEQUENTIAL_GRAY[SEQUENTIAL_GRAY.length - 1]})` }}
           />
           low → high demand
         </div>
@@ -169,7 +166,7 @@ export default function RouteHeatmap() {
               return (
                 <g key={code}>
                   <title>{c.name}</title>
-                  <circle cx={x} cy={y} r={4} fill="#0b1020" stroke="#e5e7eb" strokeWidth={1.5} />
+                  <circle cx={x} cy={y} r={4} fill="#0a0a0a" stroke="#e5e7eb" strokeWidth={1.5} />
                   <text
                     x={x + dx}
                     y={y + dy}
@@ -177,7 +174,7 @@ export default function RouteHeatmap() {
                     fontSize="11"
                     fontWeight="600"
                     fill="rgba(255,255,255,0.9)"
-                    stroke="#0b1020"
+                    stroke="#0a0a0a"
                     strokeWidth="2.5"
                     paintOrder="stroke"
                   >

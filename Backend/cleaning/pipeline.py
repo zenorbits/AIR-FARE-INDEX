@@ -5,7 +5,7 @@ from statistics import mean, stdev
 from datetime import datetime
 from dotenv import load_dotenv
 
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Boolean, UniqueConstraint, Index
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from db.models import FlightPrice
@@ -47,12 +47,15 @@ class FlightPriceClean(BaseClean):
 
     __table_args__ = (
         UniqueConstraint(
-            "flight_number", 
-            "departure_time", 
-            "scraped_hour", 
+            "flight_number",
+            "departure_time",
+            "scraped_hour",
             "source",
             name="uq_flight_dep_scraped_src_clean"
         ),
+        # The API filters by route + lead_time_days on every read; without
+        # this the table gets a sequential scan on those lookups.
+        Index("ix_flight_prices_clean_route_lead", "route", "lead_time_days"),
     )
 
 
@@ -183,9 +186,15 @@ def run_pipeline():
                 m = mean(fares)
                 s = stdev(fares)
                 for r in group_rows:
+                    # Sanity bounds: below 500 INR is below any real domestic base
+                    # fare (likely a scrape/parse error); above 100000 INR is far
+                    # beyond economy fares on these routes (likely a business/first
+                    # class row or a scrape misread) -- both get flagged outright.
                     if r.total_fare < 500 or r.total_fare > 100000:
                         r.is_outlier = True
                         rows_flagged_as_outliers += 1
+                    # Otherwise, flag statistical outliers within the (route, lead_time)
+                    # group: >3 standard deviations from the group mean.
                     elif s > 0 and abs(r.total_fare - m) > 3 * s:
                         r.is_outlier = True
                         rows_flagged_as_outliers += 1

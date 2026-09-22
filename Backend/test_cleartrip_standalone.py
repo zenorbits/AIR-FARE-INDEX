@@ -11,8 +11,8 @@ if __name__ == "__main__":
     results = scraper.scrape(
         origin="DEL",
         destination="BOM",
-        travel_date="20/09/2026",  # DD/MM/YYYY, pick a real near-future date
-        lead_time_days=10
+        travel_date="01/11/2026",  # DD/MM/YYYY, pick a real near-future date
+        lead_time_days=45
     )
     print(f"\n\nTOTAL RESULTS: {len(results)}")
     for r in results[:5]:

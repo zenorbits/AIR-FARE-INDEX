@@ -1,5 +1,5 @@
 {
-  "trained_at": "2026-09-13T12:42:36.255161+00:00",
+  "trained_at": "2026-09-17T16:15:59.536533+00:00",
   "target": "total_fare",
   "features": [
     "route",
@@ -25,10 +25,10 @@
     "departure_day_of_week",
     "departure_month"
   ],
-  "n_rows_raw": 12184,
-  "n_rows_after_cleaning": 12011,
-  "n_train": 9608,
-  "n_test": 2403,
+  "n_rows_raw": 20487,
+  "n_rows_after_cleaning": 20185,
+  "n_train": 16148,
+  "n_test": 4037,
   "model_type": "HistGradientBoostingRegressor(log-target)",
   "model_params": {
     "categorical_features": "from_dtype",
@@ -54,15 +54,15 @@
     "warm_start": false
   },
   "train_metrics": {
-    "mae": 353.8798246829197,
-    "rmse": 687.3840425864565,
-    "r2": 0.9464606875091279,
-    "n": 9608
+    "mae": 458.4326863568133,
+    "rmse": 888.1672746406891,
+    "r2": 0.8906945281879037,
+    "n": 16148
   },
   "test_metrics": {
-    "mae": 838.7309705783151,
-    "rmse": 1587.5558064444203,
-    "r2": 0.6114027279957606,
-    "n": 2403
+    "mae": 828.907140263382,
+    "rmse": 1507.9580698668324,
+    "r2": 0.6612064762749006,
+    "n": 4037
   }
 }

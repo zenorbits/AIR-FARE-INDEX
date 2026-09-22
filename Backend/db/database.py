@@ -43,10 +43,10 @@ def insert_flights(engine, flights_data: List[Dict[str, Any]]) -> int:
             # On conflict (source, flight_number, departure_time, scraped_hour), do nothing
             stmt = stmt.on_conflict_do_nothing(
                 index_elements=["source", "flight_number", "departure_time", "scraped_hour"]
-            )
+            ).returning(FlightPrice.id)
             
             result = session.execute(stmt)
-            if result.rowcount > 0:
+            if result.fetchone() is not None:
                 inserted_count += 1
                 
         session.commit()
