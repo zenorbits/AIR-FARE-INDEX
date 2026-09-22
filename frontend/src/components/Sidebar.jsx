@@ -1,6 +1,11 @@
-const NAV_ITEMS = [{ key: "dashboard", label: "Dashboard", icon: "📊" }];
+import { NavLink } from "react-router-dom";
 
-export default function Sidebar({ active = "dashboard" }) {
+const NAV_ITEMS = [
+  { path: "/", label: "Dashboard", icon: "📊" },
+  { path: "/priceprediction", label: "Price Prediction", icon: "🔮" },
+];
+
+export default function Sidebar() {
   return (
     <aside className="glass w-full md:w-60 md:min-h-screen md:sticky md:top-0 flex md:flex-col shrink-0 p-4 md:p-6 gap-4 md:gap-8 rounded-none md:rounded-r-2xl border-t-0 md:border-t border-l-0">
       <div className="flex items-center gap-2 md:mb-4">
@@ -15,18 +20,21 @@ export default function Sidebar({ active = "dashboard" }) {
 
       <nav className="flex md:flex-col gap-2">
         {NAV_ITEMS.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left ${
-              active === item.key
-                ? "bg-blue-500/15 text-white shadow-inner border border-blue-400/30"
-                : "text-white/60 hover:bg-white/8 hover:text-white/90"
-            }`}
+          <NavLink
+            key={item.path}
+            to={item.path}
+            end={item.path === "/"}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left ${
+                isActive
+                  ? "bg-blue-500/15 text-white shadow-inner border border-blue-400/30"
+                  : "text-white/60 hover:bg-white/8 hover:text-white/90"
+              }`
+            }
           >
             <span aria-hidden="true">{item.icon}</span>
             {item.label}
-          </button>
+          </NavLink>
         ))}
       </nav>
 
