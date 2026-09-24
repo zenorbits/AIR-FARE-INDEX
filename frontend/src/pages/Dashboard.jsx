@@ -10,7 +10,6 @@ import { AVAILABLE_LEAD_TIMES } from "../api/client";
 // Below-the-fold panels: code-split so their (and only their) code loads
 // after the above-the-fold dashboard has rendered.
 const FareDecomposition = lazy(() => import("../components/FareDecomposition"));
-const PricePrediction = lazy(() => import("../components/PricePrediction"));
 const BacktestPanel = lazy(() => import("../components/BacktestPanel"));
 
 function PanelFallback() {
@@ -65,10 +64,6 @@ export default function Dashboard() {
 
       <Suspense fallback={<PanelFallback />}>
         <FareDecomposition />
-      </Suspense>
-
-      <Suspense fallback={<PanelFallback />}>
-        <PricePrediction />
       </Suspense>
 
       <Suspense fallback={<PanelFallback />}>

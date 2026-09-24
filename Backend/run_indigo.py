@@ -39,6 +39,14 @@ def build_jobs(routes, lead_times):
     return [(r[0], r[1], lt) for r in routes for lt in lead_times]
 
 def main():
+    try:
+        _run()
+    except Exception:
+        logger.exception("run_indigo crashed")
+        raise
+
+
+def _run():
     logger.info("Starting run_indigo standalone entry point.")
     load_dotenv()
     
@@ -53,7 +61,7 @@ def main():
 
     try:
         config = load_config()
-        routes = config.get("routes", [])
+        routes = [(r["origin"], r["destination"]) for r in config.get("routes", [])]
         lead_times = config.get("lead_time_days", [])
     except Exception as e:
         logger.critical(f"Failed to load config.yaml: {e}")

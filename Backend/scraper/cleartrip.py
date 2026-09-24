@@ -44,23 +44,77 @@ def _dismiss_overlays(page, log_func):
         pass
 
 
+def _read_calendar_months(page):
+    """Parse the two visible DayPicker-Caption headers (left pane, right pane) into (year, month) tuples."""
+    months = []
+    for cap in page.query_selector_all("div.DayPicker-Caption"):
+        try:
+            dt = datetime.strptime(cap.inner_text().strip(), "%B %Y")
+            months.append((dt.year, dt.month))
+        except ValueError:
+            continue
+    return months
+
+
 def _select_date(page, date_obj, log_func):
-    """Click the calendar cell, paging forward month by month. False = beyond booking window."""
+    """
+    Read the two-pane calendar's month/year headers (div.DayPicker-Caption) and page
+    forward (svg[data-testid='rightArrow']) or backward (.DayPicker-wrapper .ta-left svg,
+    which has no data-testid and stays in the DOM but drops its 'c-pointer' class when
+    disabled) until the target month is one of the two visible panes. The persistent
+    browser profile can leave the calendar open on a later month than the target, so
+    paging must be able to go either direction, not just forward.
+    Only once the target month is in view is the day cell (div[aria-label*=...]) located,
+    via a Locator re-queried immediately before the click (not a held ElementHandle) to
+    avoid stale-element errors. False = ran out of arrow in that direction (beyond
+    booking window going forward, or before the earliest selectable month going back).
+    """
     formatted = date_obj.strftime("%a %b %d %Y")
     cell_selector = f"div[aria-label*='{formatted}']"
+    target = (date_obj.year, date_obj.month)
+
+    try:
+        page.wait_for_selector("div.DayPicker-Caption", state="visible", timeout=5000)
+    except Exception:
+        pass
+
+    months = _read_calendar_months(page)
+    if not months:
+        raise RuntimeError("Could not read calendar month header (no div.DayPicker-Caption found)")
+    direction = "back" if target < months[0] else "fwd"
+
     for i in range(13):
-        cell = page.query_selector(cell_selector)
-        if cell and cell.is_visible():
-            cell.click()
-            log_func(f"Date selected after {i} next-month clicks")
-            return True
-        arrow = page.query_selector("svg[data-testid='rightArrow']")
-        if not arrow or not arrow.is_visible():
-            log_func(f"Date {formatted} beyond booking window (arrow gone after {i} clicks)")
+        if target in months:
+            break
+
+        if direction == "fwd":
+            arrow = page.query_selector("svg[data-testid='rightArrow']")
+            arrow_ok = bool(arrow and arrow.is_visible())
+        else:
+            arrow = page.query_selector(".DayPicker-wrapper .ta-left svg")
+            arrow_ok = bool(arrow and arrow.is_visible() and "c-pointer" in (arrow.get_attribute("class") or ""))
+
+        if not arrow_ok:
+            shown = ", ".join(f"{y}-{m:02d}" for y, m in months)
+            log_func(f"Date {formatted} beyond booking window (arrow gone after {i} clicks, direction={direction}, shown={shown})")
             return False
+
         arrow.click()
         page.wait_for_timeout(600)
-    raise RuntimeError(f"Date {formatted} not found after 13 next-month clicks")
+        months = _read_calendar_months(page)
+        if not months:
+            raise RuntimeError("Could not read calendar month header (no div.DayPicker-Caption found)")
+    else:
+        shown = ", ".join(f"{y}-{m:02d}" for y, m in months)
+        raise RuntimeError(f"Date {formatted} not found after 13 {direction} clicks (shown={shown})")
+
+    try:
+        page.locator(cell_selector).first.click(timeout=3000)
+    except Exception as e:
+        raise RuntimeError(f"Day cell for {formatted} not clickable after target month matched: {e}")
+
+    log_func(f"Date selected after {i} clicks (direction={direction})")
+    return True
 
 
 class ClearTripScraper(BaseScraper):
