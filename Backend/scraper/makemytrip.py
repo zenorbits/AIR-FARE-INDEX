@@ -869,16 +869,25 @@ def insert_rows(db, out, requested):
 def failure_outcome(reason, extra=""):
     return dict(rows=[], nearby=0, nbytes=0, status=None, complete=False, url_it="-", url_dates=[], failure=reason, extra=extra)
 
-def run(jobs=None, insert=False):
+RUN_STATS = {"attempted": 0, "inserted": 0, "rows": 0}   # filled by run_matrix; read by in-process callers (main.py)
+
+def run(jobs=None, insert=False, standalone=True, engine=None):
     """Start the MMT Chrome, run the searches (jobs = [(origin, dest, lead), ...] or the built-in matrix), tear down.
-    insert=True stores clean results in flight_prices. Returns True if the run was aborted."""
-    db = make_db() if insert else None
+    insert=True stores clean results in flight_prices. Returns True if the run was aborted.
+    standalone=False (embedded in main.py): the run deadline aborts the run instead of os._exit()-ing the host process.
+    engine: reuse the caller's SQLAlchemy engine instead of building a second one."""
+    if insert and engine is not None:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        from db.database import insert_flights
+        db = (engine, insert_flights)
+    else:
+        db = make_db() if insert else None
     profile_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".profiles", "mmt_cdp"))
     os.makedirs(profile_dir, exist_ok=True)
     chrome = ChromeProc(profile_dir)
     chrome.start()
     try:
-        return run_matrix(chrome, jobs, db)
+        return run_matrix(chrome, jobs, db, standalone=standalone)
     finally:
         # Always tear down the Chrome we started, even if the matrix crashed mid-run.
         chrome.stop()
@@ -888,7 +897,7 @@ def main():
     sys.argv = [a for a in sys.argv if a != "--insert"]
     if run(None, insert): sys.exit(2)
 
-def run_matrix(chrome, search_matrix=None, db=None):
+def run_matrix(chrome, search_matrix=None, db=None, standalone=True):
     """Returns True if the run was aborted (3 consecutive kills or an unrecoverable restart failure)."""
     global RUN_T0
     RUN_T0 = time.time()
@@ -898,10 +907,17 @@ def run_matrix(chrome, search_matrix=None, db=None):
     start_time = time.time()
     run_deadline = float(os.environ.get("MMT_RUN_DEADLINE", RUN_DEADLINE))
 
+    deadline_hit = threading.Event()
+
     def deadman():
-        log(f"DEADMAN: run exceeded {run_deadline:.0f}s - killing Chrome and exiting so a scheduled run cannot hang forever")
+        if standalone:
+            log(f"DEADMAN: run exceeded {run_deadline:.0f}s - killing Chrome and exiting so a scheduled run cannot hang forever")
+            chrome.stop()
+            os._exit(3)
+        # Embedded in main.py: never take the host process down. Kill Chrome to unblock any hung call; the loop sees the flag and aborts.
+        log(f"DEADMAN: run exceeded {run_deadline:.0f}s - killing Chrome and aborting this source only")
+        deadline_hit.set()
         chrome.stop()
-        os._exit(3)
     deadman_timer = threading.Timer(run_deadline, deadman)
     deadman_timer.daemon = True
     deadman_timer.start()
@@ -936,6 +952,10 @@ def run_matrix(chrome, search_matrix=None, db=None):
             sess.open()
 
         for idx, (origin, dest, lead) in enumerate(search_matrix):
+            if deadline_hit.is_set():
+                aborted = True
+                log(f"ABORTING: run deadline hit before search {idx + 1} of {len(search_matrix)}")
+                break
             log(f"--- Searching {origin}-{dest} T+{lead} ({idx + 1}/{len(search_matrix)}) ---")
             target_date = datetime.now() + timedelta(days=lead)
             kills = 0
@@ -1010,6 +1030,8 @@ def run_matrix(chrome, search_matrix=None, db=None):
         except Exception: pass
 
     deadman_timer.cancel()
+    if deadline_hit.is_set(): aborted = True
+    RUN_STATS.update(attempted=len(results), inserted=inserted_total, rows=sum(r["rows"] for r in results))
     failed = [r for r in results if r["failure"]]
     log("=" * 40)
     log("MATRIX RUN SUMMARY")
