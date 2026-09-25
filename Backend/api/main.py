@@ -1,5 +1,6 @@
 # Runnable via: uvicorn api.main:app --reload
 
+import logging
 import os
 import time
 from collections import defaultdict, deque
@@ -19,12 +20,34 @@ from sqlalchemy import desc, asc, func
 from ml.predict import predict_fare, get_model_metadata, PredictionInputError
 
 # Import existing database setup and models
-from index_calc.models import AirfareIndex
-from cleaning.pipeline import FlightPriceClean
+from index_calc.models import AirfareIndex, Base as _IndexBase
+from cleaning.pipeline import FlightPriceClean, BaseClean as _CleanBase
+from db.models import Base as _ScraperBase
 from backtest.validate import load_cpi_benchmark, load_apix_monthly, compare as compare_backtest
 
 from api.deps import get_db, verify_api_key, engine
 from api.assistant import router as assistant_router
+
+logger = logging.getLogger(__name__)
+
+# Ensure the schema exists before serving any request. create_all() only
+# creates tables that are missing (CREATE TABLE IF NOT EXISTS semantics) --
+# never touches existing tables/data -- so this is safe to run on every
+# startup. Without this, a freshly provisioned database (e.g. a new
+# deployment) 500s on every query until someone happens to run the scraper
+# (Backend/main.py), which is the only other place these tables get created.
+#
+# Best-effort: unlike just constructing the Engine object (lazy, no
+# connection attempt), create_all() needs a live connection right away. If
+# the DB is briefly unreachable at boot, the app should still start and
+# serve /health rather than crash-loop -- endpoints that need the DB will
+# fail per-request as before, which is the pre-existing failure mode, not
+# a new one.
+try:
+    for _base in (_ScraperBase, _IndexBase, _CleanBase):
+        _base.metadata.create_all(engine)
+except Exception:
+    logger.warning("Could not create/verify database schema at startup", exc_info=True)
 
 class PredictPriceRequest(BaseModel):
     route: str = Field(..., min_length=1, description="e.g. DEL-BOM")
