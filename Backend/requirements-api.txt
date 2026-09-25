@@ -1,0 +1,22 @@
+# Dependencies for running the FastAPI web API (api/main.py) only --
+# NOT the scraping pipeline (Backend/main.py + scraper/*), which needs
+# requirements.txt instead.
+#
+# Kept separate because requirements.txt's playwright==1.42.0 (pinned to
+# pyee==11.0.1) and patchright==1.62.3 (needs pyee>=13,<14) have
+# unresolvable, conflicting pins -- pip refuses to install both together.
+# The API never imports playwright/patchright/playwright-stealth (see the
+# scraper/ package), so it doesn't need either; this file has everything
+# the API's own import graph actually touches, kept in sync with the
+# pins in requirements.txt for the packages both files share.
+SQLAlchemy==2.0.28
+psycopg[binary]
+python-dotenv==1.0.1
+fastapi
+uvicorn
+setuptools<81
+google-genai
+joblib
+numpy
+pandas
+scikit-learn
