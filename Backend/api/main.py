@@ -285,10 +285,11 @@ def get_routes(
 @app.post("/predict-price", response_model=PredictPriceResponse)
 def predict_price(
     payload: PredictPriceRequest,
+    db: Session = Depends(get_db),
     api_key: str = Depends(verify_api_key)
 ):
     try:
-        fare = predict_fare(**payload.model_dump())
+        fare = predict_fare(**payload.model_dump(), db=db)
     except FileNotFoundError as e:
         raise HTTPException(
             status_code=503,
@@ -318,6 +319,7 @@ def predict_price_curve(
     airline: str = Query(..., min_length=1, description="IATA code or name, e.g. 6E"),
     cabin_class: str = Query("ECONOMY", min_length=1),
     stops: int = Query(0, ge=0, le=5),
+    db: Session = Depends(get_db),
     api_key: str = Depends(verify_api_key),
 ):
     """Predicted fare for the same flight booked at different lead times.
@@ -357,6 +359,7 @@ def predict_price_curve(
                     departure_hour=departure_hour,
                     departure_day_of_week=departure_date.weekday(),
                     departure_month=departure_date.month,
+                    db=db,
                 ),
             )
             for lt in lead_times
