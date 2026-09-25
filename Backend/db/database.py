@@ -18,6 +18,17 @@ def get_engine():
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
         raise ValueError("DATABASE_URL environment variable is not set")
+
+    # Hosted Postgres providers (Render, Railway, Heroku, ...) hand out plain
+    # "postgres://" or "postgresql://" connection strings, which make
+    # SQLAlchemy default to the psycopg2 driver -- not installed here, only
+    # psycopg (v3) is (see requirements.txt). Normalize to the psycopg3
+    # dialect so a copy-pasted provider URL works without manual editing.
+    if database_url.startswith("postgres://"):
+        database_url = "postgresql+psycopg://" + database_url[len("postgres://"):]
+    elif database_url.startswith("postgresql://"):
+        database_url = "postgresql+psycopg://" + database_url[len("postgresql://"):]
+
     return create_engine(database_url, pool_pre_ping=True)
 
 def init_db(engine):
