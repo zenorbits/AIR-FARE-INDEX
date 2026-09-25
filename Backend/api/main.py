@@ -69,7 +69,11 @@ app = FastAPI(title="Airfare API")
 # Comma-separated list of extra allowed origins (e.g. your deployed frontend's
 # URL) via the ALLOWED_ORIGINS env var, on top of the local dev servers --
 # so a deployment doesn't require editing code, just setting an env var.
-_extra_origins = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+#
+# Browsers' Origin header is always scheme://host[:port] with no trailing
+# slash, so a pasted URL that has one (an easy copy-paste mistake) would
+# otherwise silently fail to match and break CORS -- strip it defensively.
+_extra_origins = [o.strip().rstrip("/") for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
 ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:5173", *_extra_origins]
 
 # Add CORS middleware
