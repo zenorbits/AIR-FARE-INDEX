@@ -897,12 +897,11 @@ if __name__ == "__main__":
         routes = [("DEL", "BOM"), ("DEL", "BLR")]
         lead_times = [7, 14]
     else:
-        routes = [
-            ("DEL", "BOM"), ("BOM", "DEL"),
-            ("DEL", "BLR"), ("BLR", "DEL"),
-            ("DEL", "MAA"), ("MAA", "DEL")
-        ]
-        lead_times = [1, 3, 7, 14, 30]
+        import yaml
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.yaml"), encoding="utf-8") as fh:
+            _cfg = yaml.safe_load(fh)
+        routes = [(r["origin"], r["destination"]) for r in _cfg["routes"]]
+        lead_times = _cfg["lead_time_days"]
 
     jobs = [(r[0], r[1], lt) for r in routes for lt in lead_times]
 
