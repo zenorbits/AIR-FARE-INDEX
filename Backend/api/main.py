@@ -66,7 +66,11 @@ class PredictCurveResponse(BaseModel):
 app = FastAPI(title="Airfare API")
 
 
-ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:5173"]
+# Comma-separated list of extra allowed origins (e.g. your deployed frontend's
+# URL) via the ALLOWED_ORIGINS env var, on top of the local dev servers --
+# so a deployment doesn't require editing code, just setting an env var.
+_extra_origins = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:5173", *_extra_origins]
 
 # Add CORS middleware
 app.add_middleware(
