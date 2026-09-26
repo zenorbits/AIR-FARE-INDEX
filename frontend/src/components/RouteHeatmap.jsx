@@ -18,10 +18,11 @@ const TILE_URL =
 const TILE_ATTRIBUTION =
   "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community";
 
-const INDIA_CENTER = [22.5, 82.8]; // [lat, lng]
+// Tight to India's own extent (not the wider South/Southeast Asia region) so
+// the initial view and pan/zoom limits stay focused on India.
 const INDIA_BOUNDS = [
-  [4, 66],
-  [38, 100],
+  [6, 68],
+  [36, 98],
 ];
 
 // Sequential single-hue (blue) ramp — magnitude reads as one hue from
@@ -123,10 +124,10 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
       ) : (
         <div className="relative">
           <MapContainer
-            center={INDIA_CENTER}
-            zoom={4}
+            bounds={INDIA_BOUNDS}
+            boundsOptions={{ padding: [24, 24] }}
             minZoom={4}
-            maxZoom={7}
+            maxZoom={8}
             maxBounds={INDIA_BOUNDS}
             maxBoundsViscosity={1.0}
             scrollWheelZoom={false}
