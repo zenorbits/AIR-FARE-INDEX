@@ -1,20 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
-import { ComposableMap, Geographies, Geography } from "react-simple-maps";
-import { geoMercator } from "d3-geo";
-import indiaGeo from "../data/indiaGeo.json";
+import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import { getHeatmapRoutes } from "../api/client";
 
-// India's real coastline as GeoJSON (Natural Earth, via react-simple-maps +
-// d3-geo) instead of a hand-drawn SVG silhouette — see
-// scripts/extract-india-geo.js for how src/data/indiaGeo.json was generated.
-const MAP_WIDTH = 480;
-const MAP_HEIGHT = 560;
+// Real basemap tiles (CARTO Dark Matter, free, no API key) instead of a
+// hand-fitted GeoJSON silhouette + custom projection — this renders India's
+// actual coastline/borders correctly at any zoom/pan, with no projection
+// math to get wrong.
+const TILE_URL = "https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png";
+const TILE_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+const INDIA_CENTER = [22.5, 82.8]; // [lat, lng]
+const INDIA_BOUNDS = [
+  [4, 66],
+  [38, 100],
+];
 
 // Sequential single-hue (blue) ramp — magnitude reads as one hue from
 // dim to bright, never a rainbow. Low intensity recedes into the dark
-// surface; high intensity pops bright blue.
-const SEQUENTIAL_GRAY = [
-  "#0d366b", // recedes into the dark surface (low demand)
+// basemap; high intensity pops bright blue.
+const SEQUENTIAL_BLUE = [
+  "#0d366b", // recedes into the dark basemap (low demand)
   "#184f95",
   "#1c5cab",
   "#256abf",
@@ -22,7 +29,7 @@ const SEQUENTIAL_GRAY = [
   "#3987e5",
   "#5598e7",
   "#6da7ec",
-  "#86b6ef", // pops against the dark surface (high demand)
+  "#86b6ef", // pops against the dark basemap (high demand)
 ];
 
 function lerpColor(a, b, t) {
@@ -42,18 +49,31 @@ function lerpColor(a, b, t) {
 
 function intensityColor(intensity) {
   const clamped = Math.min(1, Math.max(0, intensity));
-  const steps = SEQUENTIAL_GRAY.length - 1;
+  const steps = SEQUENTIAL_BLUE.length - 1;
   const pos = clamped * steps;
   const i = Math.min(steps - 1, Math.floor(pos));
-  return lerpColor(SEQUENTIAL_GRAY[i], SEQUENTIAL_GRAY[i + 1], pos - i);
+  return lerpColor(SEQUENTIAL_BLUE[i], SEQUENTIAL_BLUE[i + 1], pos - i);
 }
 
-const LABEL_OFFSET = {
-  top: { dx: 0, dy: -10, anchor: "middle" },
-  bottom: { dx: 0, dy: 16, anchor: "middle" },
-  left: { dx: -9, dy: 3, anchor: "end" },
-  right: { dx: 9, dy: 3, anchor: "start" },
-};
+// A gentle quadratic-bezier arc between two [lat, lng] points, bulging
+// north, sampled into a polyline (Leaflet draws straight segments between
+// positions, so a real curve has to be pre-sampled like this).
+function arcPoints([lat1, lng1], [lat2, lng2], segments = 24) {
+  const distance = Math.hypot(lat2 - lat1, lng2 - lng1);
+  const bulge = Math.max(0.6, distance * 0.22);
+  const controlLat = (lat1 + lat2) / 2 + bulge;
+  const controlLng = (lng1 + lng2) / 2;
+
+  const points = [];
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const inv = 1 - t;
+    const lat = inv * inv * lat1 + 2 * inv * t * controlLat + t * t * lat2;
+    const lng = inv * inv * lng1 + 2 * inv * t * controlLng + t * t * lng2;
+    points.push([lat, lng]);
+  }
+  return points;
+}
 
 export default function RouteHeatmap({ leadTimeDays = 30 }) {
   const [routes, setRoutes] = useState([]);
@@ -69,18 +89,14 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
     });
   }, [leadTimeDays]);
 
-  const projection = useMemo(
-    () => geoMercator().center([82.8, 22.5]).scale(880).translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]),
-    [],
-  );
-
-  const projected = useMemo(() => {
+  // Leaflet wants [lat, lng]; CITY_COORDS stores [lng, lat] (GeoJSON order).
+  const latLngByCode = useMemo(() => {
     const map = {};
     Object.entries(cities).forEach(([code, c]) => {
-      map[code] = projection(c.coordinates);
+      map[code] = [c.coordinates[1], c.coordinates[0]];
     });
     return map;
-  }, [cities, projection]);
+  }, [cities]);
 
   return (
     <section className="glass p-5 md:p-6">
@@ -89,7 +105,7 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
         <div className="flex items-center gap-2 text-xs text-white/45">
           <span
             className="inline-block h-2 w-16 rounded-full"
-            style={{ background: `linear-gradient(90deg, ${SEQUENTIAL_GRAY[0]}, ${SEQUENTIAL_GRAY[SEQUENTIAL_GRAY.length - 1]})` }}
+            style={{ background: `linear-gradient(90deg, ${SEQUENTIAL_BLUE[0]}, ${SEQUENTIAL_BLUE[SEQUENTIAL_BLUE.length - 1]})` }}
           />
           low → high demand
         </div>
@@ -98,95 +114,67 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
       {loading ? (
         <div className="h-[420px] rounded-xl bg-white/5 animate-pulse" />
       ) : (
-        <div className="relative flex justify-center">
-          <ComposableMap
-            projection={projection}
-            width={MAP_WIDTH}
-            height={MAP_HEIGHT}
-            style={{ width: "100%", maxWidth: 380, height: "auto" }}
+        <div className="relative">
+          <MapContainer
+            center={INDIA_CENTER}
+            zoom={4}
+            minZoom={4}
+            maxZoom={7}
+            maxBounds={INDIA_BOUNDS}
+            maxBoundsViscosity={1.0}
+            scrollWheelZoom={false}
+            className="h-[420px] w-full rounded-xl border border-white/10"
+            style={{ background: "#060810" }}
           >
-            <Geographies geography={indiaGeo}>
-              {({ geographies }) =>
-                geographies.map((geo) => (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill="rgba(255,255,255,0.06)"
-                    stroke="rgba(255,255,255,0.3)"
-                    strokeWidth={1}
-                    style={{
-                      default: { outline: "none" },
-                      hover: { outline: "none" },
-                      pressed: { outline: "none" },
-                    }}
-                  />
-                ))
-              }
-            </Geographies>
+            <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} subdomains="abcd" />
 
             {routes.map((r) => {
-              const from = projected[r.from];
-              const to = projected[r.to];
+              const from = latLngByCode[r.from];
+              const to = latLngByCode[r.to];
               if (!from || !to) return null;
 
-              const [x1, y1] = from;
-              const [x2, y2] = to;
-              const mx = (x1 + x2) / 2;
-              const my = (y1 + y2) / 2 - 26; // arc bulge
               const key = `${r.from}-${r.to}`;
               const isHovered = hovered === key;
 
               return (
-                <path
+                <Polyline
                   key={key}
-                  d={`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`}
-                  fill="none"
-                  stroke={intensityColor(r.intensity)}
-                  strokeWidth={1.5 + r.intensity * 6}
-                  strokeLinecap="round"
-                  opacity={isHovered ? 1 : 0.7 + r.intensity * 0.25}
-                  onMouseEnter={() => setHovered(key)}
-                  onMouseLeave={() => setHovered(null)}
-                  style={{ cursor: "pointer", transition: "opacity 0.15s" }}
-                >
-                  <title>
-                    {cities[r.from]?.name ?? r.from} → {cities[r.to]?.name ?? r.to} · index{" "}
-                    {r.index.toFixed(1)}
-                  </title>
-                </path>
+                  positions={arcPoints(from, to)}
+                  pathOptions={{
+                    color: intensityColor(r.intensity),
+                    weight: 1.5 + r.intensity * 6,
+                    opacity: isHovered ? 1 : 0.7 + r.intensity * 0.25,
+                    lineCap: "round",
+                  }}
+                  eventHandlers={{
+                    mouseover: () => setHovered(key),
+                    mouseout: () => setHovered(null),
+                  }}
+                />
               );
             })}
 
             {Object.entries(cities).map(([code, c]) => {
-              const pos = projected[code];
+              const pos = latLngByCode[code];
               if (!pos) return null;
-              const [x, y] = pos;
-              const { dx, dy, anchor } = LABEL_OFFSET[c.labelPos] ?? LABEL_OFFSET.top;
 
               return (
-                <g key={code}>
-                  <title>{c.name}</title>
-                  <circle cx={x} cy={y} r={4} fill="#060810" stroke="#93c5fd" strokeWidth={1.5} />
-                  <text
-                    x={x + dx}
-                    y={y + dy}
-                    textAnchor={anchor}
-                    fontSize="11"
-                    fontWeight="600"
-                    fill="rgba(255,255,255,0.9)"
-                    stroke="#060810"
-                    strokeWidth="2.5"
-                    paintOrder="stroke"
-                  >
-                    {code}
-                  </text>
-                </g>
+                <CircleMarker
+                  key={code}
+                  center={pos}
+                  radius={5}
+                  pathOptions={{ color: "#93c5fd", weight: 1.5, fillColor: "#060810", fillOpacity: 1 }}
+                >
+                  <Tooltip direction="top" offset={[0, -6]} opacity={1}>
+                    {c.name} ({code})
+                  </Tooltip>
+                </CircleMarker>
               );
             })}
-          </ComposableMap>
+          </MapContainer>
 
           {hovered && (
-            <div className="absolute top-2 right-2 glass px-3 py-2 rounded-lg text-xs text-white/85 border border-blue-400/30">
+            <div className="absolute top-2 right-2 glass px-3 py-2 rounded-lg text-xs text-white/85 border border-blue-400/30 pointer-events-none z-[1000]">
               {(() => {
                 const r = routes.find((r) => `${r.from}-${r.to}` === hovered);
                 if (!r) return null;

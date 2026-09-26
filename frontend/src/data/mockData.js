@@ -14,22 +14,20 @@
 //   GET /api/heatmap         -> HEATMAP_ROUTES
 // ---------------------------------------------------------------------------
 
-// Real city coordinates ([longitude, latitude]) used to plot the India route
-// heatmap with react-simple-maps, which projects them onto the actual India
-// coastline (src/data/indiaGeo.json — regenerate via scripts/extract-india-geo.js).
-// `labelPos` tells RouteHeatmap which side to place the text label on, so
-// closely-spaced cities (e.g. the Mumbai/Pune/Goa cluster) don't overlap.
+// Real city coordinates ([longitude, latitude], GeoJSON order) used to plot
+// the India route heatmap on a real Leaflet/CARTO basemap in RouteHeatmap.jsx
+// (converted to [latitude, longitude] there, which is what Leaflet expects).
 export const CITY_COORDS = {
-  DEL: { name: "Delhi", coordinates: [77.1025, 28.7041], labelPos: "top" },
-  AMD: { name: "Ahmedabad", coordinates: [72.5714, 23.0225], labelPos: "left" },
-  BOM: { name: "Mumbai", coordinates: [72.8777, 19.076], labelPos: "left" },
-  PNQ: { name: "Pune", coordinates: [73.8567, 18.5204], labelPos: "right" },
-  GOI: { name: "Goa", coordinates: [73.8278, 15.4909], labelPos: "left" },
-  HYD: { name: "Hyderabad", coordinates: [78.4867, 17.385], labelPos: "right" },
-  BLR: { name: "Bengaluru", coordinates: [77.5946, 12.9716], labelPos: "bottom" },
-  MAA: { name: "Chennai", coordinates: [80.2707, 13.0827], labelPos: "right" },
-  COK: { name: "Kochi", coordinates: [76.2673, 9.9312], labelPos: "bottom" },
-  CCU: { name: "Kolkata", coordinates: [88.3639, 22.5726], labelPos: "right" },
+  DEL: { name: "Delhi", coordinates: [77.1025, 28.7041] },
+  AMD: { name: "Ahmedabad", coordinates: [72.5714, 23.0225] },
+  BOM: { name: "Mumbai", coordinates: [72.8777, 19.076] },
+  PNQ: { name: "Pune", coordinates: [73.8567, 18.5204] },
+  GOI: { name: "Goa", coordinates: [73.8278, 15.4909] },
+  HYD: { name: "Hyderabad", coordinates: [78.4867, 17.385] },
+  BLR: { name: "Bengaluru", coordinates: [77.5946, 12.9716] },
+  MAA: { name: "Chennai", coordinates: [80.2707, 13.0827] },
+  COK: { name: "Kochi", coordinates: [76.2673, 9.9312] },
+  CCU: { name: "Kolkata", coordinates: [88.3639, 22.5726] },
 };
 
 // Full city name for a code, e.g. "DEL" -> "Delhi". Falls back to the code
