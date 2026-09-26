@@ -3,13 +3,20 @@ import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip } from "react-
 import "leaflet/dist/leaflet.css";
 import { getHeatmapRoutes } from "../api/client";
 
-// Real basemap tiles (CARTO Dark Matter, free, no API key) instead of a
-// hand-fitted GeoJSON silhouette + custom projection — this renders India's
-// actual coastline/borders correctly at any zoom/pan, with no projection
-// math to get wrong.
-const TILE_URL = "https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png";
+// Real basemap tiles instead of a hand-fitted GeoJSON silhouette + custom
+// projection — this renders India's actual coastline/borders correctly at
+// any zoom/pan, with no projection math to get wrong.
+//
+// CARTO's basemap tiles (previously used here) now require a free account
+// + API key -- their old anonymous basemaps.cartocdn.com URLs return an
+// "API KEY REQUIRED" watermark as of their newer pricing/access policy.
+// Esri's World Dark Gray Base is used instead: no signup or key required.
+// Note the {z}/{y}/{x} order -- Esri's ArcGIS REST tile services use that
+// order, not the {z}/{x}/{y} most other providers (including CARTO) use.
+const TILE_URL =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
 const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community";
 
 const INDIA_CENTER = [22.5, 82.8]; // [lat, lng]
 const INDIA_BOUNDS = [
@@ -126,7 +133,7 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
             className="h-[420px] w-full rounded-xl border border-white/10"
             style={{ background: "#060810" }}
           >
-            <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} subdomains="abcd" />
+            <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
 
             {routes.map((r) => {
               const from = latLngByCode[r.from];
