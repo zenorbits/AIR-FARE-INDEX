@@ -122,10 +122,19 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
       {loading ? (
         <div className="h-[420px] rounded-xl bg-white/5 animate-pulse" />
       ) : (
-        <div className="relative">
+        // India's bounding box is roughly as tall as it is wide (30° lat by
+        // 30° lng). Leaflet's fitBounds picks the zoom that fits BOTH
+        // dimensions of the box into the container, so a full-width but
+        // fixed-height (420px) container on a wide screen leaves height as
+        // the binding constraint -- at that zoom, the much-wider-than-tall
+        // container then shows far more area side to side than India needs,
+        // spilling into neighboring countries. Capping the container's own
+        // width close to its height keeps its aspect ratio near the bounds
+        // box's own, so the fit stays tight on any screen size.
+        <div className="relative mx-auto max-w-[440px]">
           <MapContainer
             bounds={INDIA_BOUNDS}
-            boundsOptions={{ padding: [24, 24] }}
+            boundsOptions={{ padding: [16, 16] }}
             minZoom={4}
             maxZoom={8}
             maxBounds={INDIA_BOUNDS}
