@@ -1,20 +1,43 @@
 import { useMemo, useState, useEffect } from "react";
-import { ComposableMap, Geographies, Geography } from "react-simple-maps";
-import { geoMercator } from "d3-geo";
-import indiaGeo from "../data/indiaGeo.json";
+import indiaStatesPng from "../assets/india-states.png";
 import { getHeatmapRoutes } from "../api/client";
 
-// India's real coastline as GeoJSON (Natural Earth, via react-simple-maps +
-// d3-geo) instead of live basemap tiles — see scripts/extract-india-geo.js
-// for how src/data/indiaGeo.json was generated.
+// Transparent India-with-state-borders PNG, with routes/cities drawn as an
+// SVG overlay on top of it (rather than rendering the shape live from
+// GeoJSON) — positioned via a lon/lat -> pixel calibration fit to this
+// specific image's own dimensions.
 //
-// The projection is fit to the GeoJSON via d3-geo's fitSize() rather than a
-// hand-picked center/scale — fitSize computes the scale and translation
-// that make the shape fill the target box exactly, so there's no manual
-// number to get slightly wrong and end up with a subtly stretched or
-// off-center silhouette.
-const MAP_WIDTH = 480;
-const MAP_HEIGHT = 560;
+// Calibration: the image is a tightly-cropped (no padding) trace of India's
+// mainland, so its pixel bounding box is assumed to correspond directly to
+// the mainland's real geographic bounding box. That geographic box was
+// computed once from the verified India GeoJSON (src/data/indiaGeo.json,
+// itself from Natural Earth -- see scripts/extract-india-geo.js) via:
+//   node --input-type=module -e "
+//     import { geoBounds } from 'd3-geo'; import fs from 'fs';
+//     const g = JSON.parse(fs.readFileSync('src/data/indiaGeo.json'));
+//     // geometry.coordinates[0] is the mainland ring -- by far the
+//     // largest of its 14 polygons (the other 13 are small islands,
+//     // e.g. Andaman & Nicobar, which this clipart doesn't depict);
+//     // geoBounds on just that ring gives the mainland-only box below.
+//     console.log(geoBounds({ type: 'Feature', geometry: {
+//       type: 'Polygon', coordinates: g.features[0].geometry.coordinates[0] } }));
+//   "
+// Verified by projecting all 10 known cities onto the image and confirming
+// each lands in its correct real-world position relative to the drawn
+// state borders (Delhi north, Mumbai/Pune/Goa along the west coast,
+// Chennai/Kochi at the southern tips, Kolkata in the east, etc).
+const IMAGE_WIDTH = 315;
+const IMAGE_HEIGHT = 350;
+const LON_MIN = 68.1648816488165;
+const LON_MAX = 97.34317343173433;
+const LAT_MIN = 8.078251125011263;
+const LAT_MAX = 35.49668967408425;
+
+function project([lon, lat]) {
+  const x = (IMAGE_WIDTH * (lon - LON_MIN)) / (LON_MAX - LON_MIN);
+  const y = (IMAGE_HEIGHT * (LAT_MAX - lat)) / (LAT_MAX - LAT_MIN);
+  return [x, y];
+}
 
 // Sequential single-hue (blue) ramp — magnitude reads as one hue from
 // dim to bright, never a rainbow. Low intensity recedes into the dark
@@ -55,10 +78,10 @@ function intensityColor(intensity) {
 }
 
 const LABEL_OFFSET = {
-  top: { dx: 0, dy: -10, anchor: "middle" },
-  bottom: { dx: 0, dy: 16, anchor: "middle" },
-  left: { dx: -9, dy: 3, anchor: "end" },
-  right: { dx: 9, dy: 3, anchor: "start" },
+  top: { dx: 0, dy: -7, anchor: "middle" },
+  bottom: { dx: 0, dy: 11, anchor: "middle" },
+  left: { dx: -6, dy: 2, anchor: "end" },
+  right: { dx: 6, dy: 2, anchor: "start" },
 };
 
 export default function RouteHeatmap({ leadTimeDays = 30 }) {
@@ -76,20 +99,13 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
     });
   }, [leadTimeDays]);
 
-  // fitSize needs the actual geometry to fit -- computed once, since
-  // indiaGeo is a static import, not per-render data.
-  const projection = useMemo(
-    () => geoMercator().fitSize([MAP_WIDTH, MAP_HEIGHT], indiaGeo),
-    [],
-  );
-
   const projected = useMemo(() => {
     const map = {};
     Object.entries(cities).forEach(([code, c]) => {
-      map[code] = projection(c.coordinates);
+      map[code] = project(c.coordinates);
     });
     return map;
-  }, [cities, projection]);
+  }, [cities]);
 
   const hoveredRouteData = hoveredRoute
     ? routes.find((r) => `${r.from}-${r.to}` === hoveredRoute)
@@ -111,32 +127,13 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
       {loading ? (
         <div className="h-[420px] rounded-xl bg-white/5 animate-pulse" />
       ) : (
-        <div className="relative flex justify-center">
-          <ComposableMap
-            projection={projection}
-            width={MAP_WIDTH}
-            height={MAP_HEIGHT}
-            style={{ width: "100%", maxWidth: 380, height: "auto" }}
-          >
-            <Geographies geography={indiaGeo}>
-              {({ geographies }) =>
-                geographies.map((geo) => (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill="rgba(255,255,255,0.06)"
-                    stroke="rgba(147,197,253,0.35)"
-                    strokeWidth={1}
-                    style={{
-                      default: { outline: "none" },
-                      hover: { outline: "none" },
-                      pressed: { outline: "none" },
-                    }}
-                  />
-                ))
-              }
-            </Geographies>
+        <div className="relative mx-auto" style={{ maxWidth: 380 }}>
+          <img src={indiaStatesPng} alt="" className="w-full h-auto select-none pointer-events-none" draggable={false} />
 
+          <svg
+            viewBox={`0 0 ${IMAGE_WIDTH} ${IMAGE_HEIGHT}`}
+            className="absolute inset-0 w-full h-full"
+          >
             {routes.map((r) => {
               const from = projected[r.from];
               const to = projected[r.to];
@@ -145,7 +142,7 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
               const [x1, y1] = from;
               const [x2, y2] = to;
               const mx = (x1 + x2) / 2;
-              const my = (y1 + y2) / 2 - 26; // arc bulge
+              const my = (y1 + y2) / 2 - 17; // arc bulge
               const key = `${r.from}-${r.to}`;
               const isHovered = hoveredRoute === key;
 
@@ -155,7 +152,7 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
                   d={`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`}
                   fill="none"
                   stroke={intensityColor(r.intensity)}
-                  strokeWidth={1.5 + r.intensity * 6}
+                  strokeWidth={1 + r.intensity * 4}
                   strokeLinecap="round"
                   opacity={isHovered ? 1 : 0.7 + r.intensity * 0.25}
                   onMouseEnter={() => setHoveredRoute(key)}
@@ -178,16 +175,16 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
                   onMouseLeave={() => setHoveredCity(null)}
                   style={{ cursor: "pointer" }}
                 >
-                  <circle cx={x} cy={y} r={4} fill="#060810" stroke="#93c5fd" strokeWidth={1.5} />
+                  <circle cx={x} cy={y} r={3} fill="#060810" stroke="#93c5fd" strokeWidth={1.2} />
                   <text
                     x={x + dx}
                     y={y + dy}
                     textAnchor={anchor}
-                    fontSize="11"
+                    fontSize="8"
                     fontWeight="600"
                     fill="rgba(255,255,255,0.9)"
                     stroke="#060810"
-                    strokeWidth="2.5"
+                    strokeWidth="2"
                     paintOrder="stroke"
                   >
                     {code}
@@ -195,7 +192,7 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
                 </g>
               );
             })}
-          </ComposableMap>
+          </svg>
 
           {(hoveredRouteData || hoveredCity) && (
             <div className="absolute top-2 right-2 glass px-3 py-2 rounded-lg text-xs text-white/85 border border-blue-400/30 pointer-events-none">
