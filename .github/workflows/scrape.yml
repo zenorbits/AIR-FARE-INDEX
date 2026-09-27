@@ -1,0 +1,58 @@
+name: Scrape & update index
+
+# Populates the production database: scrapes current fares, cleans them, and
+# recomputes the Airfare Price Index. Runs every 2 hours to match the
+# rotating-batch cadence main.py assumes for Cleartrip (RUN_INTERVAL_HOURS in
+# Backend/main.py), and can be triggered manually for an immediate run.
+on:
+  schedule:
+    - cron: "0 */2 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    # Yatra alone is ~30 jobs at a 30-90s delay each; the sources run
+    # concurrently, so this comfortably covers the slowest of them plus the
+    # cleaning/index steps.
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: Backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install browser binaries
+        run: |
+          python -m playwright install --with-deps chromium
+          python -m patchright install chromium
+
+      - name: Disable Windows-only scrapers
+        # IndigoScraper and MakeMyTripScraper each drive their own Chrome via
+        # a hardcoded Windows install path (scraper/indigo.py,
+        # scraper/makemytrip.py) -- they only run on the maintainer's local
+        # Windows Task Scheduler setup, not this Linux runner.
+        run: |
+          python -c "
+          import yaml
+          with open('config.yaml') as f:
+              config = yaml.safe_load(f)
+          config['disabled_sources'] = ['IndigoScraper', 'MakeMyTripScraper']
+          with open('config.yaml', 'w') as f:
+              yaml.safe_dump(config, f)
+          "
+
+      - name: Run scraper, cleaning pipeline, and index calculation
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python main.py
