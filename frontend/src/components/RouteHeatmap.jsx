@@ -1,35 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { useMemo, useState, useEffect } from "react";
+import { ComposableMap, Geographies, Geography } from "react-simple-maps";
+import { geoMercator } from "d3-geo";
+import indiaGeo from "../data/indiaGeo.json";
 import { getHeatmapRoutes } from "../api/client";
 
-// Real basemap tiles instead of a hand-fitted GeoJSON silhouette + custom
-// projection — this renders India's actual coastline/borders correctly at
-// any zoom/pan, with no projection math to get wrong.
+// India's real coastline as GeoJSON (Natural Earth, via react-simple-maps +
+// d3-geo) instead of live basemap tiles — see scripts/extract-india-geo.js
+// for how src/data/indiaGeo.json was generated.
 //
-// CARTO's basemap tiles (previously used here) now require a free account
-// + API key -- their old anonymous basemaps.cartocdn.com URLs return an
-// "API KEY REQUIRED" watermark as of their newer pricing/access policy.
-// Esri's World Dark Gray Base is used instead: no signup or key required.
-// Note the {z}/{y}/{x} order -- Esri's ArcGIS REST tile services use that
-// order, not the {z}/{x}/{y} most other providers (including CARTO) use.
-const TILE_URL =
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
-const TILE_ATTRIBUTION =
-  "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community";
-
-// Tight to India's own extent (not the wider South/Southeast Asia region) so
-// the initial view and pan/zoom limits stay focused on India.
-const INDIA_BOUNDS = [
-  [6, 68],
-  [36, 98],
-];
+// The projection is fit to the GeoJSON via d3-geo's fitSize() rather than a
+// hand-picked center/scale — fitSize computes the scale and translation
+// that make the shape fill the target box exactly, so there's no manual
+// number to get slightly wrong and end up with a subtly stretched or
+// off-center silhouette.
+const MAP_WIDTH = 480;
+const MAP_HEIGHT = 560;
 
 // Sequential single-hue (blue) ramp — magnitude reads as one hue from
 // dim to bright, never a rainbow. Low intensity recedes into the dark
-// basemap; high intensity pops bright blue.
+// surface; high intensity pops bright blue.
 const SEQUENTIAL_BLUE = [
-  "#0d366b", // recedes into the dark basemap (low demand)
+  "#0d366b", // recedes into the dark surface (low demand)
   "#184f95",
   "#1c5cab",
   "#256abf",
@@ -37,7 +28,7 @@ const SEQUENTIAL_BLUE = [
   "#3987e5",
   "#5598e7",
   "#6da7ec",
-  "#86b6ef", // pops against the dark basemap (high demand)
+  "#86b6ef", // pops against the dark surface (high demand)
 ];
 
 function lerpColor(a, b, t) {
@@ -63,30 +54,18 @@ function intensityColor(intensity) {
   return lerpColor(SEQUENTIAL_BLUE[i], SEQUENTIAL_BLUE[i + 1], pos - i);
 }
 
-// A gentle quadratic-bezier arc between two [lat, lng] points, bulging
-// north, sampled into a polyline (Leaflet draws straight segments between
-// positions, so a real curve has to be pre-sampled like this).
-function arcPoints([lat1, lng1], [lat2, lng2], segments = 24) {
-  const distance = Math.hypot(lat2 - lat1, lng2 - lng1);
-  const bulge = Math.max(0.6, distance * 0.22);
-  const controlLat = (lat1 + lat2) / 2 + bulge;
-  const controlLng = (lng1 + lng2) / 2;
-
-  const points = [];
-  for (let i = 0; i <= segments; i++) {
-    const t = i / segments;
-    const inv = 1 - t;
-    const lat = inv * inv * lat1 + 2 * inv * t * controlLat + t * t * lat2;
-    const lng = inv * inv * lng1 + 2 * inv * t * controlLng + t * t * lng2;
-    points.push([lat, lng]);
-  }
-  return points;
-}
+const LABEL_OFFSET = {
+  top: { dx: 0, dy: -10, anchor: "middle" },
+  bottom: { dx: 0, dy: 16, anchor: "middle" },
+  left: { dx: -9, dy: 3, anchor: "end" },
+  right: { dx: 9, dy: 3, anchor: "start" },
+};
 
 export default function RouteHeatmap({ leadTimeDays = 30 }) {
   const [routes, setRoutes] = useState([]);
   const [cities, setCities] = useState({});
-  const [hovered, setHovered] = useState(null);
+  const [hoveredRoute, setHoveredRoute] = useState(null);
+  const [hoveredCity, setHoveredCity] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -97,14 +76,24 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
     });
   }, [leadTimeDays]);
 
-  // Leaflet wants [lat, lng]; CITY_COORDS stores [lng, lat] (GeoJSON order).
-  const latLngByCode = useMemo(() => {
+  // fitSize needs the actual geometry to fit -- computed once, since
+  // indiaGeo is a static import, not per-render data.
+  const projection = useMemo(
+    () => geoMercator().fitSize([MAP_WIDTH, MAP_HEIGHT], indiaGeo),
+    [],
+  );
+
+  const projected = useMemo(() => {
     const map = {};
     Object.entries(cities).forEach(([code, c]) => {
-      map[code] = [c.coordinates[1], c.coordinates[0]];
+      map[code] = projection(c.coordinates);
     });
     return map;
-  }, [cities]);
+  }, [cities, projection]);
+
+  const hoveredRouteData = hoveredRoute
+    ? routes.find((r) => `${r.from}-${r.to}` === hoveredRoute)
+    : null;
 
   return (
     <section className="glass p-5 md:p-6">
@@ -122,88 +111,105 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
       {loading ? (
         <div className="h-[420px] rounded-xl bg-white/5 animate-pulse" />
       ) : (
-        // India's bounding box is roughly as tall as it is wide (30° lat by
-        // 30° lng). Leaflet's fitBounds picks the zoom that fits BOTH
-        // dimensions of the box into the container, so a full-width but
-        // fixed-height (420px) container on a wide screen leaves height as
-        // the binding constraint -- at that zoom, the much-wider-than-tall
-        // container then shows far more area side to side than India needs,
-        // spilling into neighboring countries. Capping the container's own
-        // width close to its height keeps its aspect ratio near the bounds
-        // box's own, so the fit stays tight on any screen size.
-        <div className="relative mx-auto max-w-[440px]">
-          <MapContainer
-            bounds={INDIA_BOUNDS}
-            boundsOptions={{ padding: [16, 16] }}
-            minZoom={4}
-            maxZoom={8}
-            maxBounds={INDIA_BOUNDS}
-            maxBoundsViscosity={1.0}
-            scrollWheelZoom={false}
-            className="h-[420px] w-full rounded-xl border border-white/10"
-            style={{ background: "#060810" }}
+        <div className="relative flex justify-center">
+          <ComposableMap
+            projection={projection}
+            width={MAP_WIDTH}
+            height={MAP_HEIGHT}
+            style={{ width: "100%", maxWidth: 380, height: "auto" }}
           >
-            <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} />
+            <Geographies geography={indiaGeo}>
+              {({ geographies }) =>
+                geographies.map((geo) => (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill="rgba(255,255,255,0.06)"
+                    stroke="rgba(147,197,253,0.35)"
+                    strokeWidth={1}
+                    style={{
+                      default: { outline: "none" },
+                      hover: { outline: "none" },
+                      pressed: { outline: "none" },
+                    }}
+                  />
+                ))
+              }
+            </Geographies>
 
             {routes.map((r) => {
-              const from = latLngByCode[r.from];
-              const to = latLngByCode[r.to];
+              const from = projected[r.from];
+              const to = projected[r.to];
               if (!from || !to) return null;
 
+              const [x1, y1] = from;
+              const [x2, y2] = to;
+              const mx = (x1 + x2) / 2;
+              const my = (y1 + y2) / 2 - 26; // arc bulge
               const key = `${r.from}-${r.to}`;
-              const isHovered = hovered === key;
+              const isHovered = hoveredRoute === key;
 
               return (
-                <Polyline
+                <path
                   key={key}
-                  positions={arcPoints(from, to)}
-                  pathOptions={{
-                    color: intensityColor(r.intensity),
-                    weight: 1.5 + r.intensity * 6,
-                    opacity: isHovered ? 1 : 0.7 + r.intensity * 0.25,
-                    lineCap: "round",
-                  }}
-                  eventHandlers={{
-                    mouseover: () => setHovered(key),
-                    mouseout: () => setHovered(null),
-                  }}
+                  d={`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`}
+                  fill="none"
+                  stroke={intensityColor(r.intensity)}
+                  strokeWidth={1.5 + r.intensity * 6}
+                  strokeLinecap="round"
+                  opacity={isHovered ? 1 : 0.7 + r.intensity * 0.25}
+                  onMouseEnter={() => setHoveredRoute(key)}
+                  onMouseLeave={() => setHoveredRoute(null)}
+                  style={{ cursor: "pointer", transition: "opacity 0.15s" }}
                 />
               );
             })}
 
             {Object.entries(cities).map(([code, c]) => {
-              const pos = latLngByCode[code];
+              const pos = projected[code];
               if (!pos) return null;
+              const [x, y] = pos;
+              const { dx, dy, anchor } = LABEL_OFFSET[c.labelPos] ?? LABEL_OFFSET.top;
 
               return (
-                <CircleMarker
+                <g
                   key={code}
-                  center={pos}
-                  radius={5}
-                  pathOptions={{ color: "#93c5fd", weight: 1.5, fillColor: "#060810", fillOpacity: 1 }}
+                  onMouseEnter={() => setHoveredCity(code)}
+                  onMouseLeave={() => setHoveredCity(null)}
+                  style={{ cursor: "pointer" }}
                 >
-                  <Tooltip direction="top" offset={[0, -6]} opacity={1}>
-                    {c.name} ({code})
-                  </Tooltip>
-                </CircleMarker>
+                  <circle cx={x} cy={y} r={4} fill="#060810" stroke="#93c5fd" strokeWidth={1.5} />
+                  <text
+                    x={x + dx}
+                    y={y + dy}
+                    textAnchor={anchor}
+                    fontSize="11"
+                    fontWeight="600"
+                    fill="rgba(255,255,255,0.9)"
+                    stroke="#060810"
+                    strokeWidth="2.5"
+                    paintOrder="stroke"
+                  >
+                    {code}
+                  </text>
+                </g>
               );
             })}
-          </MapContainer>
+          </ComposableMap>
 
-          {hovered && (
-            <div className="absolute top-2 right-2 glass px-3 py-2 rounded-lg text-xs text-white/85 border border-blue-400/30 pointer-events-none z-[1000]">
-              {(() => {
-                const r = routes.find((r) => `${r.from}-${r.to}` === hovered);
-                if (!r) return null;
-                return (
-                  <>
-                    <p className="font-semibold">
-                      {cities[r.from]?.name ?? r.from} → {cities[r.to]?.name ?? r.to}
-                    </p>
-                    <p className="text-white/50">Index: {r.index.toFixed(1)}</p>
-                  </>
-                );
-              })()}
+          {(hoveredRouteData || hoveredCity) && (
+            <div className="absolute top-2 right-2 glass px-3 py-2 rounded-lg text-xs text-white/85 border border-blue-400/30 pointer-events-none">
+              {hoveredCity ? (
+                <p className="font-semibold">{cities[hoveredCity]?.name ?? hoveredCity}</p>
+              ) : (
+                <>
+                  <p className="font-semibold">
+                    {cities[hoveredRouteData.from]?.name ?? hoveredRouteData.from} →{" "}
+                    {cities[hoveredRouteData.to]?.name ?? hoveredRouteData.to}
+                  </p>
+                  <p className="text-white/50">Index: {hoveredRouteData.index.toFixed(1)}</p>
+                </>
+              )}
             </div>
           )}
         </div>
