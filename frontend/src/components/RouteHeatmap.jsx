@@ -107,6 +107,20 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
     return map;
   }, [cities]);
 
+  // CITY_COORDS lists every city this dashboard knows about, but not
+  // every one of them necessarily has a route in the current data (e.g.
+  // Goa/Kochi aren't among the routes currently scraped) -- only show a
+  // marker for cities that actually appear in at least one real route,
+  // rather than every city the frontend happens to have coordinates for.
+  const citiesWithRoutes = useMemo(() => {
+    const codes = new Set();
+    routes.forEach((r) => {
+      codes.add(r.from);
+      codes.add(r.to);
+    });
+    return Object.fromEntries(Object.entries(cities).filter(([code]) => codes.has(code)));
+  }, [cities, routes]);
+
   const hoveredRouteData = hoveredRoute
     ? routes.find((r) => `${r.from}-${r.to}` === hoveredRoute)
     : null;
@@ -162,7 +176,7 @@ export default function RouteHeatmap({ leadTimeDays = 30 }) {
               );
             })}
 
-            {Object.entries(cities).map(([code, c]) => {
+            {Object.entries(citiesWithRoutes).map(([code, c]) => {
               const pos = projected[code];
               if (!pos) return null;
               const [x, y] = pos;
