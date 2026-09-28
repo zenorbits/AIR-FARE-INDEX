@@ -1,14 +1,14 @@
-import os
 import logging
 from collections import defaultdict
 from statistics import mean, stdev
 from datetime import datetime
 from dotenv import load_dotenv
 
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Boolean, UniqueConstraint, Index
+from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, UniqueConstraint, Index
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from db.models import FlightPrice
+from db.database import get_engine
 
 load_dotenv()
 
@@ -57,13 +57,6 @@ class FlightPriceClean(BaseClean):
         # this the table gets a sequential scan on those lookups.
         Index("ix_flight_prices_clean_route_lead", "route", "lead_time_days"),
     )
-
-
-def get_engine():
-    database_url = os.environ.get("DATABASE_URL")
-    if not database_url:
-        raise ValueError("DATABASE_URL environment variable is not set")
-    return create_engine(database_url, pool_pre_ping=True)
 
 
 class CleanRow:
