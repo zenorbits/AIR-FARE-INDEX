@@ -5,10 +5,13 @@
 // committed directly), so run this with world-atlas installed temporarily:
 //   npm install --no-save world-atlas topojson-client
 //   node scripts/extract-india-geo.js
-const fs = require("fs");
-const path = require("path");
-const topojson = require("topojson-client");
-const world = require("world-atlas/countries-50m.json");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import * as topojson from "topojson-client";
+import world from "world-atlas/countries-50m.json" with { type: "json" };
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const geo = topojson.feature(world, world.objects.countries);
 const india = geo.features.find((f) => f.id === "356"); // ISO 3166-1 numeric: India

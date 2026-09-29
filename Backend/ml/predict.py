@@ -116,6 +116,36 @@ def _validate_inputs(
         raise PredictionInputError("; ".join(errors))
 
 
+def get_recent_route_fare(db, route: str, lead_time_days: int) -> Optional[float]:
+    """Live counterpart of the RECENT_FARE_COLUMN training feature: the
+    most recently scraped total_fare for this exact (route,
+    lead_time_days) combination, per the same clean, non-outlier data the
+    model was trained on. Returns None (not an error) if `db` is not
+    given, the query fails (e.g. DB temporarily unreachable), or nothing
+    has been scraped for this combination yet -- this is an enrichment
+    lookup for one feature, not something that should ever take down a
+    prediction request; the model handles a missing value natively."""
+    if db is None:
+        return None
+
+    from cleaning.pipeline import FlightPriceClean  # local import: avoids a hard DB dependency for callers that don't pass db
+
+    try:
+        row = (
+            db.query(FlightPriceClean.total_fare)
+            .filter(FlightPriceClean.route == route)
+            .filter(FlightPriceClean.lead_time_days == lead_time_days)
+            .filter(FlightPriceClean.is_outlier != True)  # noqa: E712
+            .order_by(FlightPriceClean.scraped_at.desc())
+            .first()
+        )
+    except Exception:
+        logger.warning("get_recent_route_fare: DB lookup failed, predicting without it", exc_info=True)
+        return None
+
+    return float(row[0]) if row else None
+
+
 def predict_fare(
     route: str,
     airline: str,
@@ -126,12 +156,18 @@ def predict_fare(
     departure_day_of_week: int,
     departure_month: int,
     source: str = "cleartrip",
+    db=None,
 ) -> float:
     """Predict total_fare (INR) for a single flight, using the trained
     HistGradientBoostingRegressor pipeline. Raises PredictionInputError on invalid
     input (unknown-but-well-formed categories are allowed through and
     handled by the encoder as an unseen category, rather than rejected --
-    only structurally invalid values raise)."""
+    only structurally invalid values raise).
+
+    `db`, if given, is used to look up the most recently observed fare for
+    this (route, lead_time_days) -- by far the model's strongest feature
+    (see ml/features.py). Optional so this still works without a DB
+    session (e.g. tests), just with a weaker (NaN) value for that feature."""
     _validate_inputs(
         route,
         airline,
@@ -146,6 +182,7 @@ def predict_fare(
     pipeline = _load_model()
 
     normalized_airline = normalize_airline_input(airline)
+    recent_fare = get_recent_route_fare(db, route, lead_time_days)
     row = build_single_prediction_row(
         route=route,
         airline=normalized_airline,
@@ -156,6 +193,7 @@ def predict_fare(
         departure_hour=departure_hour,
         departure_day_of_week=departure_day_of_week,
         departure_month=departure_month,
+        recent_fare=recent_fare,
     )
 
     prediction = pipeline.predict(row)[0]

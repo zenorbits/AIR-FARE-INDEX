@@ -1,5 +1,6 @@
 # Runnable via: uvicorn api.main:app --reload
 
+import logging
 import os
 import time
 from collections import defaultdict, deque
@@ -19,12 +20,34 @@ from sqlalchemy import desc, asc, func
 from ml.predict import predict_fare, get_model_metadata, PredictionInputError
 
 # Import existing database setup and models
-from index_calc.models import AirfareIndex
-from cleaning.pipeline import FlightPriceClean
+from index_calc.models import AirfareIndex, Base as _IndexBase
+from cleaning.pipeline import FlightPriceClean, BaseClean as _CleanBase
+from db.models import Base as _ScraperBase
 from backtest.validate import load_cpi_benchmark, load_apix_monthly, compare as compare_backtest
 
 from api.deps import get_db, verify_api_key, engine
 from api.assistant import router as assistant_router
+
+logger = logging.getLogger(__name__)
+
+# Ensure the schema exists before serving any request. create_all() only
+# creates tables that are missing (CREATE TABLE IF NOT EXISTS semantics) --
+# never touches existing tables/data -- so this is safe to run on every
+# startup. Without this, a freshly provisioned database (e.g. a new
+# deployment) 500s on every query until someone happens to run the scraper
+# (Backend/main.py), which is the only other place these tables get created.
+#
+# Best-effort: unlike just constructing the Engine object (lazy, no
+# connection attempt), create_all() needs a live connection right away. If
+# the DB is briefly unreachable at boot, the app should still start and
+# serve /health rather than crash-loop -- endpoints that need the DB will
+# fail per-request as before, which is the pre-existing failure mode, not
+# a new one.
+try:
+    for _base in (_ScraperBase, _IndexBase, _CleanBase):
+        _base.metadata.create_all(engine)
+except Exception:
+    logger.warning("Could not create/verify database schema at startup", exc_info=True)
 
 class PredictPriceRequest(BaseModel):
     route: str = Field(..., min_length=1, description="e.g. DEL-BOM")
@@ -66,7 +89,15 @@ class PredictCurveResponse(BaseModel):
 app = FastAPI(title="Airfare API")
 
 
-ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:5173"]
+# Comma-separated list of extra allowed origins (e.g. your deployed frontend's
+# URL) via the ALLOWED_ORIGINS env var, on top of the local dev servers --
+# so a deployment doesn't require editing code, just setting an env var.
+#
+# Browsers' Origin header is always scheme://host[:port] with no trailing
+# slash, so a pasted URL that has one (an easy copy-paste mistake) would
+# otherwise silently fail to match and break CORS -- strip it defensively.
+_extra_origins = [o.strip().rstrip("/") for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:5173", *_extra_origins]
 
 # Add CORS middleware
 app.add_middleware(
@@ -285,10 +316,11 @@ def get_routes(
 @app.post("/predict-price", response_model=PredictPriceResponse)
 def predict_price(
     payload: PredictPriceRequest,
+    db: Session = Depends(get_db),
     api_key: str = Depends(verify_api_key)
 ):
     try:
-        fare = predict_fare(**payload.model_dump())
+        fare = predict_fare(**payload.model_dump(), db=db)
     except FileNotFoundError as e:
         raise HTTPException(
             status_code=503,
@@ -318,6 +350,7 @@ def predict_price_curve(
     airline: str = Query(..., min_length=1, description="IATA code or name, e.g. 6E"),
     cabin_class: str = Query("ECONOMY", min_length=1),
     stops: int = Query(0, ge=0, le=5),
+    db: Session = Depends(get_db),
     api_key: str = Depends(verify_api_key),
 ):
     """Predicted fare for the same flight booked at different lead times.
@@ -357,6 +390,7 @@ def predict_price_curve(
                     departure_hour=departure_hour,
                     departure_day_of_week=departure_date.weekday(),
                     departure_month=departure_date.month,
+                    db=db,
                 ),
             )
             for lt in lead_times

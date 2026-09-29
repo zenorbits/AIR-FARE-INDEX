@@ -74,28 +74,32 @@ export default function PricePrediction() {
       });
   }, []);
 
-  const origins = useMemo(
-    () => [...new Set(routes.map((r) => r.split("-")[0]))].sort(),
-    [routes],
-  );
+  // Every city that appears anywhere in the backend's known routes (as
+  // either an origin or a destination) -- not just the ones with a direct
+  // route from the currently selected origin. The backend's own price
+  // model already handles an (origin, destination) pair it hasn't seen as
+  // a route without erroring (unseen categories fall through the
+  // encoder), so there's no need to restrict destinations to only the
+  // routes actually scraped.
+  const allCities = useMemo(() => {
+    const codes = new Set();
+    routes.forEach((r) => {
+      const [o, d] = r.split("-");
+      if (o) codes.add(o);
+      if (d) codes.add(d);
+    });
+    return [...codes].sort();
+  }, [routes]);
 
+  const origins = allCities;
   const destinationsForOrigin = useMemo(
-    () =>
-      routes
-        .filter((r) => r.startsWith(`${form.origin}-`))
-        .map((r) => r.split("-")[1])
-        .sort(),
-    [routes, form.origin],
+    () => allCities.filter((code) => code !== form.origin),
+    [allCities, form.origin],
   );
 
   function handleOriginChange(origin) {
     setForm((f) => {
-      const validDestinations = routes
-        .filter((r) => r.startsWith(`${origin}-`))
-        .map((r) => r.split("-")[1]);
-      const destination = validDestinations.includes(f.destination)
-        ? f.destination
-        : validDestinations[0] ?? "";
+      const destination = f.destination && f.destination !== origin ? f.destination : allCities.find((c) => c !== origin) ?? "";
       return { ...f, origin, destination };
     });
   }
