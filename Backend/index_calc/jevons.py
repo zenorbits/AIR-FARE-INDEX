@@ -1,17 +1,17 @@
-import os
 import math
 import logging
 from datetime import datetime, timedelta, date
 from collections import defaultdict
 from dotenv import load_dotenv
 
-from sqlalchemy import create_engine, func
+from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 
 # Import our models
 from index_calc.models import Base as IndexBase, AirfareIndex
 # Import the cleaned data model
 from cleaning.pipeline import FlightPriceClean
+from db.database import get_engine
 
 load_dotenv()
 
@@ -53,12 +53,6 @@ def get_geometric_mean(data):
     
     # Fallback
     return math.exp(sum(math.log(x) for x in data) / len(data))
-
-def get_engine():
-    database_url = os.environ.get("DATABASE_URL")
-    if not database_url:
-        raise ValueError("DATABASE_URL environment variable is not set")
-    return create_engine(database_url, pool_pre_ping=True)
 
 def get_weekly_period(dt):
     """Returns (start_date, end_date) for the ISO week containing dt."""

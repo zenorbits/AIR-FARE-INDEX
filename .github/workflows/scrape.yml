@@ -37,6 +37,16 @@ jobs:
           python -m playwright install --with-deps chromium
           python -m patchright install chromium
 
+      - name: Install a virtual display
+        # yatra.py, cleartrip.py and akasa.py all launch Chromium with
+        # headless=False -- almost certainly deliberate, since a headed
+        # browser is harder for these booking sites' anti-bot checks to
+        # fingerprint as automation than a headless one. Rather than switch
+        # to headless (which would change that anti-detection behavior),
+        # give the headed browser a real display to open via Xvfb, exactly
+        # as Playwright's own "Missing X server" error message suggests.
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
       - name: Disable Windows-only scrapers
         # IndigoScraper and MakeMyTripScraper each drive their own Chrome via
         # a hardcoded Windows install path (scraper/indigo.py,
@@ -55,4 +65,4 @@ jobs:
       - name: Run scraper, cleaning pipeline, and index calculation
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: python main.py
+        run: xvfb-run -a python main.py
